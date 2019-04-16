@@ -539,6 +539,9 @@ Citizen.CreateThread(function()
 					   SetBlipSprite(delivery,38)
 					   SetBlipColour(delivery,12)
 					   SetBlipFlashes(delivery,1)
+					   BeginTextCommandSetBlipName("STRING")
+					   AddTextComponentString("Livraison carjacking")--set name of the delivery place
+					   EndTextCommandSetBlipName(delivery)
 		end			   
 	  end 
 	end
