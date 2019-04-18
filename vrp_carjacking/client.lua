@@ -28,9 +28,21 @@ function despawntimer()
 	   SetEntityAsNoLongerNeeded(SellableCar)
 	   SetModelAsNoLongerNeeded(GetHashKey(vehmodel))
 end
+function drawTxt(x,y ,width,height,scale, text, r,g,b,a)
+	SetTextFont(0)
+	SetTextProportional(0)
+	SetTextScale(scale, scale)
+	SetTextColour(r, g, b, a)
+	SetTextDropShadow(0, 0, 0, 0,255)
+	SetTextEdge(1, 0, 0, 0, 255)
+	SetTextDropShadow()
+	SetTextOutline()
+	SetTextEntry("STRING")
+	AddTextComponentString(text)
+	DrawText(x - width/2, y - height/2 + 0.005)
+end
 
 local positions = { -- spawn positions
-
 {x=241.11,y=-1018.93,z=29.23,h=335.10},	  
 {x=-387.61,y=-376.46,z=31.76,h=81.07},
 {x=-984.17,y=-831.63,z=15.49,h=237.51},
@@ -515,16 +527,49 @@ Citizen.CreateThread(function()
 			  despawntimer()
 	   end
 	end 
+		  
+		  
+	currenthealth = GetEntityHealth(SellableCar)
+	health = (currenthealth-700)
+		   
+		
+	if currenthealth >= 850 then
+	   r = 60
+	   g = 249
+	   b = 5
+	elseif	currenthealth <= 850 and currenthealth >= 750 then 
+	   r = 250
+	   g = 190
+	   b = 30
+	elseif	currenthealth <= 750 and currenthealth >= 700 then
+	   r = 255
+	   g = 10
+	   b = 10
+	end
 	
+	RequestStreamedTextureDict("timerbars",1)
+	while not HasStreamedTextureDictLoaded("timerbars")	 do
+	Wait(1)
+	end
+	
+	if not toolate then
+	 if incar then					   
+	  if currenthealth >= 701 then		  
+		 DrawSprite("timerbars", "all_black_bg", 0.05, 0.7555,-0.25, -0.025, 0.1, 20, 55, 200, 255)
+		 DrawRect(health/4500, 0.755, -health/2000, 0.015, r, g, b, 255)
+		 drawTxt(0.525, 1.239, 1.0,1.0,0.27, "~w~Etat du véhicule", 255, 255, 255, 255)--damages level
+		 DrawSprite("timerbars", "all_black_bg", 0.009, 0.7555,-0.1, -0.025, 0.1, 20, 55, 100, 190)
+	  end
+	 end
+	end
    
-	if IsPedJacking(GetPlayerPed(-1)) and IsPedInVehicle(GetPlayerPed(-1),SellableCar,1) then 
+	if IsPedJacking(GetPlayerPed(-1)) and IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then 
 	   SetPlayerWantedLevel(PlayerId(), 2, 0) 
 	   SetPlayerWantedLevelNow(PlayerId(), 0)
 	end	
 	
  
 	if IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then
-		 Wait(100)
 		 incar = true 
 	else incar = false
 	end
