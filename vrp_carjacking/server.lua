@@ -10,8 +10,7 @@ local Damage = {}
 RegisterServerEvent('deposit_ok:give')
 AddEventHandler('deposit_ok:give', function(Class,Damage)			   
 local user_id = vRP.getUserId({source})
-	
-	
+		
   if(user_id)then
 	-- print(Damage)
 	 Wait(2500)

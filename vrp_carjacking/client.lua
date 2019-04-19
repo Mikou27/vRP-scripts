@@ -420,7 +420,6 @@ local drivermodels = {
 
 }
 
-
 Citizen.CreateThread(function()		   
  while true do
  local times = math.random(750000,850000)	
@@ -497,7 +496,7 @@ Citizen.CreateThread(function()
 	end	  
 	
 	if not toolate then	 
-	 if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,0.5,0.5, 4.0, 0, 1, 0) then				 
+	 if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,2.5,2.5, 4.0, 0, 1, 0) then				 
 		 if IsPedInModel(GetPlayerPed(-1),GetHashKey(vehmodel)) then 
 			 if IsPlayerWantedLevelGreater(PlayerId(),0) then
 				
@@ -530,11 +529,9 @@ Citizen.CreateThread(function()
 			  despawntimer()
 	   end
 	end 
-		  
-		  
+		  		  
 	currenthealth = GetEntityHealth(SellableCar)
-	health = (currenthealth-700)
-		   
+	health = (currenthealth-700)		   
 		
 	if currenthealth >= 850 then
 	   r = 60
@@ -583,7 +580,6 @@ Citizen.CreateThread(function()
 	  if not toolate then
 		if incar then
 		   Wait(200)
-
 		   delivery = AddBlipForCoord(1204.52, -3115.68, 5.54)
 					   SetBlipSprite(delivery,38)
 					   SetBlipColour(delivery,12)
