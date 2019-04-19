@@ -564,6 +564,7 @@ Citizen.CreateThread(function()
 	end
    
 	if IsPedJacking(GetPlayerPed(-1)) and IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then 
+	   SetNewWaypoint(1204.52, -3115.68)
 	   SetPlayerWantedLevel(PlayerId(), 2, 0) 
 	   SetPlayerWantedLevelNow(PlayerId(), 0)
 	end	
