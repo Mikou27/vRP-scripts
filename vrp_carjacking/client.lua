@@ -2,6 +2,7 @@ vRP = Proxy.getInterface("vRP")
 vRPserver = Tunnel.getInterface("vRP", "vrp_carjacking")
 
 local Class = {}
+local Damage ={}
 local toolate = false
 local onfoot = false
 local vehspawn = false
@@ -496,14 +497,16 @@ Citizen.CreateThread(function()
 	end	  
 	
 	if not toolate then	 
-	 if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,3.0,3.0, 4.0, 0, 1, 0) then				 
+	 if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,0.5,0.5, 4.0, 0, 1, 0) then				 
 		 if IsPedInModel(GetPlayerPed(-1),GetHashKey(vehmodel)) then 
 			 if IsPlayerWantedLevelGreater(PlayerId(),0) then
 				
 				 TriggerServerEvent('flic_notok:veh')
 			 else
 				 TriggerServerEvent('descendre_ok:veh')
-				 Class = GetVehicleClass(SellableCar)
+				 Class = GetVehicleClass(SellableCar)			 
+				 Damage = GetEntityHealth(SellableCar)/1000 
+				 --Citizen.Trace(Damage)
 				 SetVehicleUndriveable(SellableCar,1)
 				 onfoot = true
 			 end
@@ -513,7 +516,7 @@ Citizen.CreateThread(function()
 	  
 	if onfoot then
 	  if IsPedOnFoot(GetPlayerPed(-1)) then 
-		 TriggerServerEvent('deposit_ok:give',Class)
+		 TriggerServerEvent('deposit_ok:give',Class,Damage)
 		 TriggerServerEvent('taff_ok:veh')
 		 despawntimer()
 		 onfoot = false
