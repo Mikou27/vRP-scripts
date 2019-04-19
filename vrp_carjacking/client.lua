@@ -7,6 +7,7 @@ local toolate = false
 local onfoot = false
 local vehspawn = false
 local incar = false
+local waypoint = false
 
 function vehicle_blip(entity)
 
@@ -18,29 +19,39 @@ vehicle =  AddBlipForEntity(entity)
 		   EndTextCommandSetBlipName(vehicle)
 end
 
-function despawntimer()
-	   toolate = true  
-	   
-	   Wait(10000)	   
-	   SetEntityAsNoLongerNeeded(DriverPed)	  
-	   SetModelAsNoLongerNeeded(GetHashKey(drivermodel))	   
-	   
-	   Wait(200)
-	   SetEntityAsNoLongerNeeded(SellableCar)
-	   SetModelAsNoLongerNeeded(GetHashKey(vehmodel))
+function despawn()
+ toolate = true  	   
+ Wait(10000)	   
+ SetEntityAsNoLongerNeeded(DriverPed)	  
+ SetModelAsNoLongerNeeded(GetHashKey(model))	   	   
+ Wait(200)
+ SetEntityAsNoLongerNeeded(SellableCar)
+ SetModelAsNoLongerNeeded(GetHashKey(model))
+ DeleteEntity((SellableCar))
 end
+
+function despawntimer()
+ toolate = true    
+ Wait(10000)	   
+ SetEntityAsNoLongerNeeded(DriverPed)	  
+ SetModelAsNoLongerNeeded(GetHashKey(model))	   
+ Wait(200)
+ SetEntityAsNoLongerNeeded(SellableCar)
+ SetModelAsNoLongerNeeded(GetHashKey(model))
+end
+
 function drawTxt(x,y ,width,height,scale, text, r,g,b,a)
-	SetTextFont(0)
-	SetTextProportional(0)
-	SetTextScale(scale, scale)
-	SetTextColour(r, g, b, a)
-	SetTextDropShadow(0, 0, 0, 0,255)
-	SetTextEdge(1, 0, 0, 0, 255)
-	SetTextDropShadow()
-	SetTextOutline()
-	SetTextEntry("STRING")
-	AddTextComponentString(text)
-	DrawText(x - width/2, y - height/2 + 0.005)
+SetTextFont(0)
+SetTextProportional(0)
+SetTextScale(scale, scale)
+SetTextColour(r, g, b, a)
+SetTextDropShadow(0, 0, 0, 0,255)
+SetTextEdge(1, 0, 0, 0, 255)
+SetTextDropShadow()
+SetTextOutline()
+SetTextEntry("STRING")
+AddTextComponentString(text)
+DrawText(x - width/2, y - height/2 + 0.005)
 end
 
 local positions = { -- spawn positions
@@ -125,7 +136,7 @@ local positions = { -- spawn positions
 	"VIRGO",
 	"WINDSOR"
 
-   }  
+}  
 
 local drivermodels = {
 	"A_F_M_BEACH_01",
@@ -441,15 +452,15 @@ Citizen.CreateThread(function()
 end)
 
 Citizen.CreateThread(function()	 
-  while true do 
-   Wait(0)
-   if not toolate then
-	if incar then	 
-	   DrawMarker(1,1204.52, -3115.68, 4.54,0,0,0,0,0,0,6.0,6.0,0.5001,5,217,241,0.75,0,0,0,0)
-	   DrawMarker(4,1204.52, -3115.68, 5.74,0,0,0,0,0,0,2.5,2.5,1.5001,5,217,241,0.75,0,0,0,0)
-	end
-   end	
-  end
+while true do 
+Wait(0)
+if not toolate then
+if incar then	 
+DrawMarker(1,1204.52, -3115.68, 4.54,0,0,0,0,0,0,6.0,6.0,0.5001,5,217,241,0.75,0,0,0,0)
+DrawMarker(4,1204.52, -3115.68, 5.74,0,0,0,0,0,0,2.5,2.5,1.5001,5,217,241,0.75,0,0,0,0)
+end
+end	
+end
 end)
 
 Citizen.CreateThread(function()
@@ -481,10 +492,8 @@ Citizen.CreateThread(function()
 	 SetPedIntoVehicle(DriverPed, SellableCar, -1)
 	 TaskVehicleDriveWander(DriverPed,SellableCar,35.0, 786603)
 	 SetDriverAbility(DriverPed, 1.0)
-	 SetPedFleeAttributes(DriverPed, 10, 1)
-	  
-	 vehicle_blip(SellableCar)
-		 
+	 SetPedFleeAttributes(DriverPed, 10, 1)	  
+	 vehicle_blip(SellableCar)		 
 	 vehspawn = false	
 	 toolate = false
    
@@ -502,11 +511,11 @@ Citizen.CreateThread(function()
 				
 				 TriggerServerEvent('flic_notok:veh')
 			 else
-				 TriggerServerEvent('descendre_ok:veh')
+				 
 				 Class = GetVehicleClass(SellableCar)			 
 				 Damage = GetEntityHealth(SellableCar)/1000 
-				 --Citizen.Trace(Damage)
 				 SetVehicleUndriveable(SellableCar,1)
+				 TriggerServerEvent('descendre_ok:veh')
 				 onfoot = true
 			 end
 		 end
@@ -517,7 +526,7 @@ Citizen.CreateThread(function()
 	  if IsPedOnFoot(GetPlayerPed(-1)) then 
 		 TriggerServerEvent('deposit_ok:give',Class,Damage)
 		 TriggerServerEvent('taff_ok:veh')
-		 despawntimer()
+		 despawn()
 		 onfoot = false
 	   end
 	end
@@ -564,13 +573,16 @@ Citizen.CreateThread(function()
 	end
    
 	if IsPedJacking(GetPlayerPed(-1)) and IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then 
-	   SetNewWaypoint(1204.52, -3115.68)
 	   SetPlayerWantedLevel(PlayerId(), 2, 0) 
 	   SetPlayerWantedLevelNow(PlayerId(), 0)
 	end	
 	
  
 	if IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then
+		 if not waypoint then
+		 SetNewWaypoint(1204.52, -3115.68)
+		 waypoint = true
+		 end
 		 incar = true 
 	else incar = false
 	end
