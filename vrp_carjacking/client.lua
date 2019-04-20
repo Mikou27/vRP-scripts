@@ -8,9 +8,9 @@ local onfoot = false
 local vehspawn = false
 local incar = false
 local waypoint = false
+local timerdespawn = 0
 
 function vehicle_blip(entity)
-
 vehicle =  AddBlipForEntity(entity)
 		   SetBlipSprite(vehicle,595) 
 		   SetBlipColour(vehicle,3)
@@ -20,24 +20,25 @@ vehicle =  AddBlipForEntity(entity)
 end
 
 function despawn()
- toolate = true  	   
- Wait(10000)	   
- SetEntityAsNoLongerNeeded(DriverPed)	  
- SetModelAsNoLongerNeeded(GetHashKey(model))	   	   
- Wait(200)
- SetEntityAsNoLongerNeeded(SellableCar)
- SetModelAsNoLongerNeeded(GetHashKey(model))
- DeleteEntity((SellableCar))
+toolate = true  	   
+Wait(10000)	   
+SetEntityAsNoLongerNeeded(DriverPed)	  
+SetModelAsNoLongerNeeded(GetHashKey(model))	   	   
+Wait(200)
+SetEntityAsNoLongerNeeded(SellableCar)
+SetModelAsNoLongerNeeded(GetHashKey(model))
+DeleteEntity((SellableCar))
 end
 
 function despawntimer()
- toolate = true    
- Wait(10000)	   
- SetEntityAsNoLongerNeeded(DriverPed)	  
- SetModelAsNoLongerNeeded(GetHashKey(model))	   
- Wait(200)
- SetEntityAsNoLongerNeeded(SellableCar)
- SetModelAsNoLongerNeeded(GetHashKey(model))
+toolate = true    
+vRP.notify({"~r~Le vehicule n'est plus recherché."})--vehicle not needed anymore   
+Wait(10000)	   
+SetEntityAsNoLongerNeeded(DriverPed)	  
+SetModelAsNoLongerNeeded(GetHashKey(model))	   
+Wait(200)
+SetEntityAsNoLongerNeeded(SellableCar)
+SetModelAsNoLongerNeeded(GetHashKey(model))
 end
 
 function drawTxt(x,y ,width,height,scale, text, r,g,b,a)
@@ -77,388 +78,396 @@ local positions = { -- spawn positions
 {x=-1193.14,y=-849.12,z=14.11,h=127.46}	 
 }
 
- local vehmodels = {
-   
-	"SENTINEL",
-	"BLISTA", 
-	"DILETTANTE", 
-	"LANDSTALKER", 
-	"FACTION",
-	"PENUMBRA",
-	"WINDSOR", 
-	"SCHAFTER3",
-	"BUFFALO", 
-	"FELTZER2",
-	"F620",
-	"INGOT", 
-	"HUNTLEY", 
-	"TROPOS", 
-	"SABREGT", 
-	"DOMINATOR", 
-	"EXEMPLAR",
-	"RAPIDGT", 
-	"BUFFALO", 
-	"COMET2",
-	"PICADOR",
-	"WASHINGTON",
-	"GLENDALE",
-	"XLS",
-	"SULTAN",
-	"STRATUM",
-	"TAILGATER",
-	"CHEETAH",
-	"COMET2",
-	"CUTTER",
-	"ELEGY2",
-	"EMPEROR2",
-	"FELON",
-	"FUGITIVE",
-	"LANDSTALKER",
-	"NINEF",
-	"NINEF2",
-	"ORACLE",
-	"ORACLE2",
-	"PHOENIX", 
-	"PICADOR", 
-	"RAPIDGT",
-	"RAPIDGT2",
-	"SANCHEZ",
-	"SANCHEZ2", 
-	"STINGERGT",
-	"STRATUM",
-	"SULTAN",
-	"VOODOO2",
-	"WASHINGTON",
-	"SWIFT2",
-	"LUXOR2", 
-	"FELTZER3",
-	"OSIRIS", 
-	"VIRGO",
-	"WINDSOR"
-
+ local vehmodels = {   
+"SENTINEL",
+"BLISTA", 
+"LANDSTALKER", 
+"FACTION",
+"PENUMBRA",
+"WINDSOR", 
+"SCHAFTER3",
+"BUFFALO", 
+"FELTZER2",
+"HUNTLEY", 
+"SABREGT", 
+"DOMINATOR", 
+"EXEMPLAR",
+"RAPIDGT", 
+"BUFFALO", 
+"COMET2",
+"PICADOR",
+"WASHINGTON",
+"GLENDALE",
+"XLS",
+"SULTAN",
+"STRATUM",
+"CHEETAH",
+"COMET2",
+"ELEGY2",
+"EMPEROR2",
+"FELON",
+"FUGITIVE",
+"LANDSTALKER",
+"NINEF",
+"NINEF2",
+"ORACLE",
+"ORACLE2",
+"PHOENIX", 
+"PICADOR", 
+"RAPIDGT",
+"RAPIDGT2",
+"SANCHEZ",
+"SANCHEZ2", 
+"STINGERGT",
+"STRATUM",
+"SULTAN",
+"VOODOO2",
+"WASHINGTON",
+"FELTZER3",
+"VIRGO",
+"WINDSOR"
 }  
 
 local drivermodels = {
-	"A_F_M_BEACH_01",
-	"A_F_M_BEVHILLS_01",
-	"A_F_M_BEVHILLS_02",
-	"A_F_M_BODYBUILD_01",
-	"A_F_M_BUSINESS_02",
-	"A_F_M_DOWNTOWN_01",
-	"A_F_M_EASTSA_01",
-	"A_F_M_EASTSA_02",
-	"A_F_M_FATBLA_01",
-	"A_F_M_FATCULT_01",
-	"A_F_M_FATWHITE_01",
-	"A_F_M_KTOWN_01",
-	"A_F_M_KTOWN_02",
-	"A_F_M_PROLHOST_01",
-	"A_F_M_SALTON_01",
-	"A_F_M_SKIDROW_01",
-	"A_F_M_SOUCENTMC_01",
-	"A_F_M_SOUCENT_01",
-	"A_F_M_SOUCENT_02",
-	"A_F_M_TOURIST_01",
-	"A_F_M_TRAMPBEAC_01",
-	"A_F_M_TRAMP_01",
-	"A_F_O_GENSTREET_01",
-	"A_F_O_INDIAN_01",
-	"A_F_O_KTOWN_01",
-	"A_F_O_SALTON_01",
-	"A_F_O_SOUCENT_01",
-	"A_F_O_SOUCENT_02",
-	"A_F_Y_BEACH_01",
-	"A_F_Y_BEVHILLS_01",
-	"A_F_Y_BEVHILLS_02",
-	"A_F_Y_BEVHILLS_03",
-	"A_F_Y_BEVHILLS_04",
-	"A_F_Y_BUSINESS_01",
-	"A_F_Y_BUSINESS_02",
-	"A_F_Y_BUSINESS_03",
-	"A_F_Y_BUSINESS_04",
-	"A_F_Y_EASTSA_01",
-	"A_F_Y_EASTSA_02",
-	"A_F_Y_EASTSA_03",
-	"A_F_Y_EPSILON_01",
-	"A_F_Y_FITNESS_01",
-	"A_F_Y_FITNESS_02",
-	"A_F_Y_GENHOT_01",
-	"A_F_Y_GOLFER_01",
-	"A_F_Y_HIKER_01",
-	"A_F_Y_HIPPIE_01",
-	"A_F_Y_HIPSTER_01",
-	"A_F_Y_HIPSTER_02",
-	"A_F_Y_HIPSTER_03",
-	"A_F_Y_HIPSTER_04",
-	"A_F_Y_INDIAN_01",
-	"A_F_Y_JUGGALO_01",
-	"A_F_Y_RUNNER_01",
-	"A_F_Y_RURMETH_01",
-	"A_F_Y_SCDRESSY_01",
-	"A_F_Y_SKATER_01",
-	"A_F_Y_SOUCENT_01",
-	"A_F_Y_SOUCENT_02",
-	"A_F_Y_SOUCENT_03",
-	"A_F_Y_TENNIS_01",
-	"A_F_Y_TOPLESS_01",
-	"A_F_Y_TOURIST_01",
-	"A_F_Y_TOURIST_02",
-	"A_F_Y_VINEWOOD_01",
-	"A_F_Y_VINEWOOD_02",
-	"A_F_Y_VINEWOOD_03",
-	"A_F_Y_VINEWOOD_04",
-	"A_F_Y_YOGA_01",
-	"A_M_M_ACULT_01",
-	"A_M_M_AFRIAMER_01",
-	"A_M_M_BEACH_01",
-	"A_M_M_BEACH_02",
-	"A_M_M_BEVHILLS_01",
-	"A_M_M_BEVHILLS_02",
-	"A_M_M_BUSINESS_01",
-	"A_M_M_EASTSA_01",
-	"A_M_M_EASTSA_02",
-	"A_M_M_FARMER_01",
-	"A_M_M_FATLATIN_01",
-	"A_M_M_GENFAT_01",
-	"A_M_M_GENFAT_02",
-	"A_M_M_GOLFER_01",
-	"A_M_M_HASJEW_01",
-	"A_M_M_HILLBILLY_01",
-	"A_M_M_HILLBILLY_02",
-	"A_M_M_INDIAN_01",
-	"A_M_M_KTOWN_01",
-	"A_M_M_MALIBU_01",
-	"A_M_M_MEXCNTRY_01",
-	"A_M_M_MEXLABOR_01",
-	"A_M_M_OG_BOSS_01",
-	"A_M_M_PAPARAZZI_01",
-	"A_M_M_POLYNESIAN_01",
-	"A_M_M_RURMETH_01",
-	"A_M_M_SALTON_01",
-	"A_M_M_SALTON_02",
-	"A_M_M_SALTON_03",
-	"A_M_M_SALTON_04",
-	"A_M_M_SKATER_01",
-	"A_M_M_SKIDROW_01",
-	"A_M_M_SOCENLAT_01",
-	"A_M_M_SOUCENT_01",
-	"A_M_M_SOUCENT_02",
-	"A_M_M_SOUCENT_03",
-	"A_M_M_SOUCENT_04",
-	"A_M_M_STLAT_02",
-	"A_M_M_TRAMPBEAC_01",
-	"A_M_M_TRAMP_01",
-	"A_M_M_TRANVEST_01",
-	"A_M_M_TRANVEST_02",
-	"A_M_O_GENSTREET_01",
-	"A_M_O_KTOWN_01",
-	"A_M_O_SALTON_01",
-	"A_M_O_SOUCENT_01",
-	"A_M_O_SOUCENT_02",
-	"A_M_O_SOUCENT_03",
-	"A_M_Y_BEACHVESP_01",
-	"A_M_Y_BEACHVESP_02",
-	"A_M_Y_BEACH_01",
-	"A_M_Y_BEACH_02",
-	"A_M_Y_BEACH_03",
-	"A_M_Y_BEVHILLS_01",
-	"A_M_Y_BEVHILLS_02",
-	"A_M_Y_BREAKDANCE_01",
-	"A_M_Y_BUSICAS_01",
-	"A_M_Y_BUSINESS_01",
-	"A_M_Y_BUSINESS_02",
-	"A_M_Y_BUSINESS_03",
-	"A_M_Y_CYCLIST_01",
-	"A_M_Y_DHILL_01",
-	"A_M_Y_DOWNTOWN_01",
-	"A_M_Y_EASTSA_01",
-	"A_M_Y_EASTSA_02",
-	"A_M_Y_EPSILON_01",
-	"A_M_Y_EPSILON_02",
-	"A_M_Y_GAY_01",
-	"A_M_Y_GAY_02",
-	"A_M_Y_GENSTREET_01",
-	"A_M_Y_GENSTREET_02",
-	"A_M_Y_GOLFER_01",
-	"A_M_Y_HASJEW_01",
-	"A_M_Y_HIKER_01",
-	"A_M_Y_HIPPY_01",
-	"A_M_Y_HIPSTER_01",
-	"A_M_Y_HIPSTER_02",
-	"A_M_Y_HIPSTER_03",
-	"A_M_Y_INDIAN_01",
-	"A_M_Y_JUGGALO_01",
-	"A_M_Y_KTOWN_01",
-	"A_M_Y_KTOWN_02",
-	"A_M_Y_LATINO_01",
-	"A_M_Y_POLYNESIAN_01",
-	"A_M_Y_ROADCYC_01",
-	"A_M_Y_RUNNER_01",
-	"A_M_Y_RUNNER_02",
-	"A_M_Y_SALTON_01",
-	"A_M_Y_SKATER_01",
-	"A_M_Y_SKATER_02",
-	"A_M_Y_SOUCENT_01",
-	"A_M_Y_SOUCENT_02",
-	"A_M_Y_SOUCENT_03",
-	"A_M_Y_SOUCENT_04",
-	"A_M_Y_STBLA_01",
-	"A_M_Y_STBLA_02",
-	"A_M_Y_STLAT_01",
-	"A_M_Y_STWHI_01",
-	"A_M_Y_STWHI_02",
-	"A_M_Y_VINEWOOD_01",
-	"A_M_Y_VINEWOOD_02",
-	"A_M_Y_VINEWOOD_03",
-	"A_M_Y_VINEWOOD_04",
-	"A_M_Y_YOGA_01",
-	"G_F_Y_FAMILIES_01",
-	"G_M_M_ARMBOSS_01",
-	"G_M_M_ARMGOON_01",
-	"G_M_M_ARMLIEUT_01",
-	"G_M_M_CHEMWORK_01",
-	"G_M_M_CHIBOSS_01",
-	"G_M_M_CHICOLD_01",
-	"G_M_M_CHIGOON_01",
-	"G_M_M_CHIGOON_02",
-	"G_M_M_KORBOSS_01",
-	"G_M_M_MEXBOSS_01",
-	"G_M_M_MEXBOSS_02",
-	"G_M_Y_ARMGOON_02",
-	"G_M_Y_BALLAEAST_01",
-	"G_M_Y_BALLAORIG_01",
-	"G_M_Y_FAMCA_01",
-	"G_M_Y_FAMDNF_01",
-	"G_M_Y_FAMFOR_01",
-	"G_M_Y_KOREAN_01",
-	"G_M_Y_KOREAN_02",
-	"G_M_Y_KORLIEUT_01",
-	"G_M_Y_MEXGOON_01",
-	"G_M_Y_MEXGOON_02",
-	"G_M_Y_MEXGOON_03",
-	"G_M_Y_POLOGOON_01",
-	"G_M_Y_POLOGOON_02",
-	"G_M_Y_SALVABOSS_01",
-	"G_M_Y_SALVAGOON_01",
-	"G_M_Y_SALVAGOON_02",
-	"G_M_Y_SALVAGOON_03",
-	"G_M_Y_STRPUNK_01",
-	"G_M_Y_STRPUNK_02",
-	"HC_DRIVER",
-	"HC_GUNMAN",
-	"HC_HACKER",
-	"IG_ABIGAIL",
-	"IG_AMANDATOWNLEY",
-	"IG_ANDREAS",
-	"IG_ASHLEY",
-	"IG_BANKMAN",
-	"IG_BARRY",
-	"IG_BESTMEN",
-	"IG_BEVERLY",
-	"IG_BRAD",
-	"IG_BRIDE",
-	"IG_CAR3GUY1",
-	"IG_CAR3GUY2",
-	"IG_CASEY",
-	"IG_CHEF",
-	"IG_CHENGSR",
-	"IG_CHRISFORMAGE",
-	"IG_CLAY",
-	"IG_CLAYPAIN",
-	"IG_CLETUS",
-	"IG_DALE",
-	"IG_DAVENORTON",
-	"IG_DENISE",
-	"IG_DEVIN",
-	"IG_DOM",
-	"IG_DREYFUSS",
-	"IG_DRFRIEDLANDER",
-	"IG_FABIEN",
-	"IG_FLOYD",
-	"IG_GROOM",
-	"IG_HAO",
-	"IG_HUNTER",
-	"IG_JANET",
-	"IG_JAY_NORRIS",
-	"IG_JEWELASS",
-	"IG_JIMMYBOSTON",
-	"IG_JIMMYDISANTO",
-	"IG_JOEMINUTEMAN",
-	"IG_JOHNNYKLEBITZ",
-	"IG_JOSEF",
-	"IG_JOSH",
-	"IG_KERRYMCINTOSH",
-	"IG_LAMARDAVIS",
-	"IG_LESTERCREST",
-	"IG_LIFEINVAD_01",
-	"IG_LIFEINVAD_02",
-	"IG_MAGENTA",
-	"IG_MANUEL",
-	"IG_MARNIE",
-	"IG_MARYANN",
-	"IG_MAUDE",
-	"IG_MICHELLE",
-	"IG_MILTON",
-	"IG_MOLLY",
-	"IG_MRK",
-	"IG_MRSPHILLIPS",
-	"IG_MRS_THORNHILL",
-	"IG_NATALIA",
-	"IG_NERVOUSRON",
-	"IG_NIGEL",
-	"IG_OLD_MAN1A",
-	"IG_OLD_MAN2",
-	"IG_OMEGA",
-	"IG_ONEIL",
-	"IG_ORLEANS",
-	"IG_ORTEGA",
-	"IG_PAPER",
-	"IG_PATRICIA",
-	"IG_RAMP_HIC",
-	"IG_RAMP_HIPSTER",
-	"IG_RAMP_MEX",
-	"IG_ROCCOPELOSI",
-	"IG_RUSSIANDRUNK",
-	"IG_SCREEN_WRITER",
-	"IG_SIEMONYETARIAN",
-	"IG_SOLOMON",
-	"IG_STEVEHAINS",
-	"IG_STRETCH",
-	"IG_TALINA",
-	"IG_TANISHA",
-	"IG_TAOCHENG",
-	"IG_TAOSTRANSLATOR"
+"A_F_M_BEACH_01",
+"A_F_M_BEVHILLS_01",
+"A_F_M_BEVHILLS_02",
+"A_F_M_BODYBUILD_01",
+"A_F_M_BUSINESS_02",
+"A_F_M_DOWNTOWN_01",
+"A_F_M_EASTSA_01",
+"A_F_M_EASTSA_02",
+"A_F_M_FATBLA_01",
+"A_F_M_FATCULT_01",
+"A_F_M_FATWHITE_01",
+"A_F_M_KTOWN_01",
+"A_F_M_KTOWN_02",
+"A_F_M_PROLHOST_01",
+"A_F_M_SALTON_01",
+"A_F_M_SKIDROW_01",
+"A_F_M_SOUCENTMC_01",
+"A_F_M_SOUCENT_01",
+"A_F_M_SOUCENT_02",
+"A_F_M_TOURIST_01",
+"A_F_M_TRAMPBEAC_01",
+"A_F_M_TRAMP_01",
+"A_F_O_GENSTREET_01",
+"A_F_O_INDIAN_01",
+"A_F_O_KTOWN_01",
+"A_F_O_SALTON_01",
+"A_F_O_SOUCENT_01",
+"A_F_O_SOUCENT_02",
+"A_F_Y_BEACH_01",
+"A_F_Y_BEVHILLS_01",
+"A_F_Y_BEVHILLS_02",
+"A_F_Y_BEVHILLS_03",
+"A_F_Y_BEVHILLS_04",
+"A_F_Y_BUSINESS_01",
+"A_F_Y_BUSINESS_02",
+"A_F_Y_BUSINESS_03",
+"A_F_Y_BUSINESS_04",
+"A_F_Y_EASTSA_01",
+"A_F_Y_EASTSA_02",
+"A_F_Y_EASTSA_03",
+"A_F_Y_EPSILON_01",
+"A_F_Y_FITNESS_01",
+"A_F_Y_FITNESS_02",
+"A_F_Y_GENHOT_01",
+"A_F_Y_GOLFER_01",
+"A_F_Y_HIKER_01",
+"A_F_Y_HIPPIE_01",
+"A_F_Y_HIPSTER_01",
+"A_F_Y_HIPSTER_02",
+"A_F_Y_HIPSTER_03",
+"A_F_Y_HIPSTER_04",
+"A_F_Y_INDIAN_01",
+"A_F_Y_JUGGALO_01",
+"A_F_Y_RUNNER_01",
+"A_F_Y_RURMETH_01",
+"A_F_Y_SCDRESSY_01",
+"A_F_Y_SKATER_01",
+"A_F_Y_SOUCENT_01",
+"A_F_Y_SOUCENT_02",
+"A_F_Y_SOUCENT_03",
+"A_F_Y_TENNIS_01",
+"A_F_Y_TOPLESS_01",
+"A_F_Y_TOURIST_01",
+"A_F_Y_TOURIST_02",
+"A_F_Y_VINEWOOD_01",
+"A_F_Y_VINEWOOD_02",
+"A_F_Y_VINEWOOD_03",
+"A_F_Y_VINEWOOD_04",
+"A_F_Y_YOGA_01",
+"A_M_M_ACULT_01",
+"A_M_M_AFRIAMER_01",
+"A_M_M_BEACH_01",
+"A_M_M_BEACH_02",
+"A_M_M_BEVHILLS_01",
+"A_M_M_BEVHILLS_02",
+"A_M_M_BUSINESS_01",
+"A_M_M_EASTSA_01",
+"A_M_M_EASTSA_02",
+"A_M_M_FARMER_01",
+"A_M_M_FATLATIN_01",
+"A_M_M_GENFAT_01",
+"A_M_M_GENFAT_02",
+"A_M_M_GOLFER_01",
+"A_M_M_HASJEW_01",
+"A_M_M_HILLBILLY_01",
+"A_M_M_HILLBILLY_02",
+"A_M_M_INDIAN_01",
+"A_M_M_KTOWN_01",
+"A_M_M_MALIBU_01",
+"A_M_M_MEXCNTRY_01",
+"A_M_M_MEXLABOR_01",
+"A_M_M_OG_BOSS_01",
+"A_M_M_PAPARAZZI_01",
+"A_M_M_POLYNESIAN_01",
+"A_M_M_RURMETH_01",
+"A_M_M_SALTON_01",
+"A_M_M_SALTON_02",
+"A_M_M_SALTON_03",
+"A_M_M_SALTON_04",
+"A_M_M_SKATER_01",
+"A_M_M_SKIDROW_01",
+"A_M_M_SOCENLAT_01",
+"A_M_M_SOUCENT_01",
+"A_M_M_SOUCENT_02",
+"A_M_M_SOUCENT_03",
+"A_M_M_SOUCENT_04",
+"A_M_M_STLAT_02",
+"A_M_M_TRAMPBEAC_01",
+"A_M_M_TRAMP_01",
+"A_M_M_TRANVEST_01",
+"A_M_M_TRANVEST_02",
+"A_M_O_GENSTREET_01",
+"A_M_O_KTOWN_01",
+"A_M_O_SALTON_01",
+"A_M_O_SOUCENT_01",
+"A_M_O_SOUCENT_02",
+"A_M_O_SOUCENT_03",
+"A_M_Y_BEACHVESP_01",
+"A_M_Y_BEACHVESP_02",
+"A_M_Y_BEACH_01",
+"A_M_Y_BEACH_02",
+"A_M_Y_BEACH_03",
+"A_M_Y_BEVHILLS_01",
+"A_M_Y_BEVHILLS_02",
+"A_M_Y_BREAKDANCE_01",
+"A_M_Y_BUSICAS_01",
+"A_M_Y_BUSINESS_01",
+"A_M_Y_BUSINESS_02",
+"A_M_Y_BUSINESS_03",
+"A_M_Y_CYCLIST_01",
+"A_M_Y_DHILL_01",
+"A_M_Y_DOWNTOWN_01",
+"A_M_Y_EASTSA_01",
+"A_M_Y_EASTSA_02",
+"A_M_Y_EPSILON_01",
+"A_M_Y_EPSILON_02",
+"A_M_Y_GAY_01",
+"A_M_Y_GAY_02",
+"A_M_Y_GENSTREET_01",
+"A_M_Y_GENSTREET_02",
+"A_M_Y_GOLFER_01",
+"A_M_Y_HASJEW_01",
+"A_M_Y_HIKER_01",
+"A_M_Y_HIPPY_01",
+"A_M_Y_HIPSTER_01",
+"A_M_Y_HIPSTER_02",
+"A_M_Y_HIPSTER_03",
+"A_M_Y_INDIAN_01",
+"A_M_Y_JUGGALO_01",
+"A_M_Y_KTOWN_01",
+"A_M_Y_KTOWN_02",
+"A_M_Y_LATINO_01",
+"A_M_Y_POLYNESIAN_01",
+"A_M_Y_ROADCYC_01",
+"A_M_Y_RUNNER_01",
+"A_M_Y_RUNNER_02",
+"A_M_Y_SALTON_01",
+"A_M_Y_SKATER_01",
+"A_M_Y_SKATER_02",
+"A_M_Y_SOUCENT_01",
+"A_M_Y_SOUCENT_02",
+"A_M_Y_SOUCENT_03",
+"A_M_Y_SOUCENT_04",
+"A_M_Y_STBLA_01",
+"A_M_Y_STBLA_02",
+"A_M_Y_STLAT_01",
+"A_M_Y_STWHI_01",
+"A_M_Y_STWHI_02",
+"A_M_Y_VINEWOOD_01",
+"A_M_Y_VINEWOOD_02",
+"A_M_Y_VINEWOOD_03",
+"A_M_Y_VINEWOOD_04",
+"A_M_Y_YOGA_01",
+"G_F_Y_FAMILIES_01",
+"G_M_M_ARMBOSS_01",
+"G_M_M_ARMGOON_01",
+"G_M_M_ARMLIEUT_01",
+"G_M_M_CHEMWORK_01",
+"G_M_M_CHIBOSS_01",
+"G_M_M_CHICOLD_01",
+"G_M_M_CHIGOON_01",
+"G_M_M_CHIGOON_02",
+"G_M_M_KORBOSS_01",
+"G_M_M_MEXBOSS_01",
+"G_M_M_MEXBOSS_02",
+"G_M_Y_ARMGOON_02",
+"G_M_Y_BALLAEAST_01",
+"G_M_Y_BALLAORIG_01",
+"G_M_Y_FAMCA_01",
+"G_M_Y_FAMDNF_01",
+"G_M_Y_FAMFOR_01",
+"G_M_Y_KOREAN_01",
+"G_M_Y_KOREAN_02",
+"G_M_Y_KORLIEUT_01",
+"G_M_Y_MEXGOON_01",
+"G_M_Y_MEXGOON_02",
+"G_M_Y_MEXGOON_03",
+"G_M_Y_POLOGOON_01",
+"G_M_Y_POLOGOON_02",
+"G_M_Y_SALVABOSS_01",
+"G_M_Y_SALVAGOON_01",
+"G_M_Y_SALVAGOON_02",
+"G_M_Y_SALVAGOON_03",
+"G_M_Y_STRPUNK_01",
+"G_M_Y_STRPUNK_02",
+"HC_DRIVER",
+"HC_GUNMAN",
+"HC_HACKER",
+"IG_ABIGAIL",
+"IG_AMANDATOWNLEY",
+"IG_ANDREAS",
+"IG_ASHLEY",
+"IG_BANKMAN",
+"IG_BARRY",
+"IG_BESTMEN",
+"IG_BEVERLY",
+"IG_BRAD",
+"IG_BRIDE",
+"IG_CAR3GUY1",
+"IG_CAR3GUY2",
+"IG_CASEY",
+"IG_CHEF",
+"IG_CHENGSR",
+"IG_CHRISFORMAGE",
+"IG_CLAY",
+"IG_CLAYPAIN",
+"IG_CLETUS",
+"IG_DALE",
+"IG_DAVENORTON",
+"IG_DENISE",
+"IG_DEVIN",
+"IG_DOM",
+"IG_DREYFUSS",
+"IG_DRFRIEDLANDER",
+"IG_FABIEN",
+"IG_FLOYD",
+"IG_GROOM",
+"IG_HAO",
+"IG_HUNTER",
+"IG_JANET",
+"IG_JAY_NORRIS",
+"IG_JEWELASS",
+"IG_JIMMYBOSTON",
+"IG_JIMMYDISANTO",
+"IG_JOEMINUTEMAN",
+"IG_JOHNNYKLEBITZ",
+"IG_JOSEF",
+"IG_JOSH",
+"IG_KERRYMCINTOSH",
+"IG_LAMARDAVIS",
+"IG_LESTERCREST",
+"IG_LIFEINVAD_01",
+"IG_LIFEINVAD_02",
+"IG_MAGENTA",
+"IG_MANUEL",
+"IG_MARNIE",
+"IG_MARYANN",
+"IG_MAUDE",
+"IG_MICHELLE",
+"IG_MILTON",
+"IG_MOLLY",
+"IG_MRK",
+"IG_MRSPHILLIPS",
+"IG_MRS_THORNHILL",
+"IG_NATALIA",
+"IG_NERVOUSRON",
+"IG_NIGEL",
+"IG_OLD_MAN1A",
+"IG_OLD_MAN2",
+"IG_OMEGA",
+"IG_ONEIL",
+"IG_ORLEANS",
+"IG_ORTEGA",
+"IG_PAPER",
+"IG_PATRICIA",
+"IG_RAMP_HIC",
+"IG_RAMP_HIPSTER",
+"IG_RAMP_MEX",
+"IG_ROCCOPELOSI",
+"IG_RUSSIANDRUNK",
+"IG_SCREEN_WRITER",
+"IG_SIEMONYETARIAN",
+"IG_SOLOMON",
+"IG_STEVEHAINS",
+"IG_STRETCH",
+"IG_TALINA",
+"IG_TANISHA",
+"IG_TAOCHENG",
+"IG_TAOSTRANSLATOR"
 
 }
 
 Citizen.CreateThread(function()		   
  while true do
- local times = math.random(750000,850000)	
-	 
-	 Wait(times)	
-	 if not DoesEntityExist(SellableCar) then 
-			vehspawn = true	 
-	 else	vehspawn = false	 
-	 end
-	
-	 Wait(times)
-	 if DoesEntityExist(SellableCar) then
-		vRP.notify({"~g~Le vehicule n'est plus recherché."})--vehicle not needed anymore   
-		Wait(10000) 
-		despawntimer()
-	 else vehspawn = false
-	 end			
+ timerpawn =  math.random(750000,850000)	 
+ Wait(timerpawn)	
+ if not DoesEntityExist(SellableCar) then 
+		vehspawn = true	 
+ else	vehspawn = false	 
+ end
+-------------------------------------------  
+ timerdespawn = math.random(750000,850000)
+ Wait(timerdespawn)
+ if DoesEntityExist(SellableCar) then
+	Wait(10000) 
+	despawntimer()
+ else vehspawn = false
+ end			
  end
 end)
 
 Citizen.CreateThread(function()	 
 while true do 
+Wait(1000)
+timerdespawn = timerdespawn-1000
+end
+end)
+
+Citizen.CreateThread(function()	 
+while true do 
 Wait(0)
-if not toolate then
-if incar then	 
+if not toolate and incar then	 
+local timer = math.floor(timerdespawn/1000)
+RequestStreamedTextureDict("timerbars",1)
+	while not HasStreamedTextureDictLoaded("timerbars")	 do
+	Wait(1)
+	end
+	
+RequestStreamedTextureDict("mpmissmarkers256",1)
+	while not HasStreamedTextureDictLoaded("mpmissmarkers256")	 do
+	Wait(1)
+	end
+
+DrawSprite("timerbars", "all_black_bg", 0.05, 0.731,-0.25, -0.024, 0.1, 20, 55, 200, 255)
+DrawSprite("mpmissmarkers256", "timetrial_icon", 0.015, 0.733,0.022, 0.022, 0.19, 255, 255, 255, 255)
+if timer > 240 then secondes = " ~g~s";left = "Reste : ~g~" elseif timer < 240 and timer >120 then secondes = " ~o~s";left = "Reste: ~o~" elseif timer < 120 then secondes = " ~r~s";left = "Reste: ~r~" end
+drawTxt(0.53, 1.216, 1.0,1.0,0.30,left..timer..secondes , 255, 255, 255, 255)
 DrawMarker(1,1204.52, -3115.68, 4.54,0,0,0,0,0,0,6.0,6.0,0.5001,5,217,241,0.75,0,0,0,0)
 DrawMarker(4,1204.52, -3115.68, 5.74,0,0,0,0,0,0,2.5,2.5,1.5001,5,217,241,0.75,0,0,0,0)
-end
 end	
 end
 end)
@@ -468,7 +477,7 @@ Citizen.CreateThread(function()
    Wait(0)
  
 	if vehspawn then 
- 
+       
 	 vehmodel = vehmodels[math.random(1, #vehmodels)]
 	 vehmodel = string.upper(vehmodel)
 	 RequestModel(GetHashKey(vehmodel))
@@ -496,7 +505,7 @@ Citizen.CreateThread(function()
 	 vehicle_blip(SellableCar)		 
 	 vehspawn = false	
 	 toolate = false
-   
+     vRP.notify({"~g~Un véhicule intéressant vient d'être repéré."})
 	end		
 	
 	if DoesEntityExist(SellableCar) and (not IsPedInVehicle(GetPlayerPed(-1),SellableCar,1)) and (not toolate) then 
@@ -538,7 +547,7 @@ Citizen.CreateThread(function()
 			  despawntimer()
 	   end
 	end 
-		  		  
+	--vehicle statut bar--	  		  
 	currenthealth = GetEntityHealth(SellableCar)
 	health = (currenthealth-700)		   
 		
@@ -571,7 +580,8 @@ Citizen.CreateThread(function()
 	  end
 	 end
 	end
-   
+    -------------------
+	
 	if IsPedJacking(GetPlayerPed(-1)) and IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then 
 	   SetPlayerWantedLevel(PlayerId(), 2, 0) 
 	   SetPlayerWantedLevelNow(PlayerId(), 0)
