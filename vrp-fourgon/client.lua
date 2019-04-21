@@ -147,13 +147,13 @@ Citizen.CreateThread(function()
 		   DeleteObject(bag)
 		   despawn()				
 		end				
-		 
+		 if DoesEntityExist(car) then
 		 if GetEntityHealth(car) == 0 then 
 		   vRP.notify({"~r~Vous Avez détruit le fourgon blindé!"})
 		   removeblip(fourgon) 
 		   despawn()				
 		 end				
-			 
+		end	 
  end
 end)
 
