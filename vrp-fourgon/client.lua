@@ -94,7 +94,7 @@ Citizen.CreateThread(function()
 	   GiveWeaponToPed(driver, GetHashKey("WEAPON_PUMPSHOTGUN"),-1,0,1)
 	   GiveWeaponToPed(passenger, GetHashKey("WEAPON_PUMPSHOTGUN"),-1,0,1)
 	   fourgon_blip(car)
-	   vRP.notify({"~g~Un fourgon blindé vient d'être repéré prépares tes bombes collantes."})--A armored truck have been spotted prepare your stiky bombs.
+	   vRP.notify({"~g~Un fourgon blindé vient d'être repéré prépares tes bombes collantes."})--A armored truck has been spotted prepare your stiky bombs.
 
 	   spawn = false	
 	  
@@ -148,6 +148,11 @@ Citizen.CreateThread(function()
 		   despawn()				
 		end				
 		 
+		 if GetEntityHealth(car) == 0 then 
+		   vRP.notify({"~r~Vous Avez détruit le fourgon blindé!"})
+		   removeblip(fourgon) 
+		   despawn()				
+		 end				
 			 
  end
 end)
@@ -155,4 +160,4 @@ end)
 
 
 
---SetNewWaypoint(0.0+math.random (-1000,1500), 0.0+math.random (-1000,1500))
+
