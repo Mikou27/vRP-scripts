@@ -4,7 +4,6 @@
 vRP = Proxy.getInterface("vRP")
 vRPserver = Tunnel.getInterface("vRP", "vrp-fourgon")
 
-
 local spawn = false
 local money = false
 
@@ -19,7 +18,6 @@ SetModelAsNoLongerNeeded(0xCDEF5408)
 SetEntityAsNoLongerNeeded(passenger)
 SetModelAsNoLongerNeeded(0x63858A4A)	   
 end
-
 
 function fourgon_blip(entity)
 fourgon =  AddBlipForEntity(entity)
@@ -45,7 +43,6 @@ local positions = {--spawn position
 {x=-1193.14,y=-849.12,z=14.11,h=127.46}	 
 }
 
-
 Citizen.CreateThread(function()		   
  while true do 
    local times = math.random(750000,850000)			
@@ -56,8 +53,6 @@ Citizen.CreateThread(function()
 	  despawn()
  end
 end)
-
-
 
 Citizen.CreateThread(function()			 
  AddRelationshipGroup("fourgon")  
@@ -99,8 +94,9 @@ Citizen.CreateThread(function()
 	   GiveWeaponToPed(driver, GetHashKey("WEAPON_PUMPSHOTGUN"),-1,0,1)
 	   GiveWeaponToPed(passenger, GetHashKey("WEAPON_PUMPSHOTGUN"),-1,0,1)
 	   fourgon_blip(car)
-	  
-	  spawn = false	
+	   vRP.notify({"~g~Un fourgon blindé vient d'être repéré prépares tes bombes collantes."})--A armored truck have been spotted prepare your stiky bombs.
+
+	   spawn = false	
 	  
 	end	 
 	  
@@ -114,7 +110,7 @@ Citizen.CreateThread(function()
 			TaskCombatPed(passenger,GetPlayerPed(-1),0,16)
 			removeblip(fourgon)
 		  
-		  if not money then
+		 if not money then
 			 
 			 if GetPlayerWantedLevel(PlayerId()) <= 3 then
 				SetPlayerWantedLevel(PlayerId(), 3, 0)
@@ -133,11 +129,9 @@ Citizen.CreateThread(function()
 			  AddTextComponentString("Sac d'argent sale")--"Dirty money bag"
 			  EndTextCommandSetBlipName(objblip)
 			  money = true			
-		  end  
+		 end  
 		   
-		end			
-		
-		
+		end					
 			
 		if DoesEntityExist(bag) then 
 		   DrawMarker(0, obj.x, obj.y, obj.z+1.5, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.5, 0.5, 0.45, 49,209, 50, 100, 1, 0, 2, 0, 0, 0, 0)
@@ -158,3 +152,7 @@ Citizen.CreateThread(function()
  end
 end)
 
+
+
+
+--SetNewWaypoint(0.0+math.random (-1000,1500), 0.0+math.random (-1000,1500))
