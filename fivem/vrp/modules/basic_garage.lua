@@ -5,57 +5,16 @@ MySQL.createCommand("vRP/vehicles_table", [[
 CREATE TABLE IF NOT EXISTS vrp_user_vehicles(
   user_id INTEGER,
   vehicle VARCHAR(100),
-  veh_type varchar(255) NOT NULL DEFAULT 'default' ,
-  vehicle_colorprimary varchar(255) DEFAULT NULL,
-  vehicle_colorsecondary varchar(255) DEFAULT NULL,
-  vehicle_pearlescentcolor varchar(255) DEFAULT NULL,
-  vehicle_wheelcolor varchar(255) DEFAULT NULL,
-  vehicle_plateindex varchar(255) DEFAULT NULL,
-  vehicle_neoncolor1 varchar(255) DEFAULT NULL,
-  vehicle_neoncolor2 varchar(255) DEFAULT NULL,
-  vehicle_neoncolor3 varchar(255) DEFAULT NULL,
-  vehicle_windowtint varchar(255) DEFAULT NULL,
-  vehicle_wheeltype varchar(255) DEFAULT NULL,
-  vehicle_mods0 varchar(255) DEFAULT NULL,
-  vehicle_mods1 varchar(255) DEFAULT NULL,
-  vehicle_mods2 varchar(255) DEFAULT NULL,
-  vehicle_mods3 varchar(255) DEFAULT NULL,
-  vehicle_mods4 varchar(255) DEFAULT NULL,
-  vehicle_mods5 varchar(255) DEFAULT NULL,
-  vehicle_mods6 varchar(255) DEFAULT NULL,
-  vehicle_mods7 varchar(255) DEFAULT NULL,
-  vehicle_mods8 varchar(255) DEFAULT NULL,
-  vehicle_mods9 varchar(255) DEFAULT NULL,
-  vehicle_mods10 varchar(255) DEFAULT NULL,
-  vehicle_mods11 varchar(255) DEFAULT NULL,
-  vehicle_mods12 varchar(255) DEFAULT NULL,
-  vehicle_mods13 varchar(255) DEFAULT NULL,
-  vehicle_mods14 varchar(255) DEFAULT NULL,
-  vehicle_mods15 varchar(255) DEFAULT NULL,
-  vehicle_mods16 varchar(255) DEFAULT NULL,
-  vehicle_turbo varchar(255) NOT NULL DEFAULT 'off',
-  vehicle_tiresmoke varchar(255) NOT NULL DEFAULT 'off',
-  vehicle_xenon varchar(255) NOT NULL DEFAULT 'off',
-  vehicle_mods23 varchar(255) DEFAULT NULL,
-  vehicle_mods24 varchar(255) DEFAULT NULL,
-  vehicle_neon0 varchar(255) DEFAULT NULL,
-  vehicle_neon1 varchar(255) DEFAULT NULL,
-  vehicle_neon2 varchar(255) DEFAULT NULL,
-  vehicle_neon3 varchar(255) DEFAULT NULL,
-  vehicle_bulletproof varchar(255) DEFAULT NULL,
-  vehicle_smokecolor1 varchar(255) DEFAULT NULL,
-  vehicle_smokecolor2 varchar(255) DEFAULT NULL,
-  vehicle_smokecolor3 varchar(255) DEFAULT NULL,
-  vehicle_modvariation varchar(255) NOT NULL DEFAULT 'off',
-  vehicle_plate varchar(255) NOT NULL,
   CONSTRAINT pk_user_vehicles PRIMARY KEY(user_id,vehicle),
   CONSTRAINT fk_user_vehicles_users FOREIGN KEY(user_id) REFERENCES vrp_users(id) ON DELETE CASCADE
 );
 ]])
+
 MySQL.createCommand("vRP/add_vehicle","INSERT IGNORE INTO vrp_user_vehicles(user_id,vehicle) VALUES(@user_id,@vehicle)")
 MySQL.createCommand("vRP/remove_vehicle","DELETE FROM vrp_user_vehicles WHERE user_id = @user_id AND vehicle = @vehicle")
 MySQL.createCommand("vRP/get_vehicles","SELECT vehicle FROM vrp_user_vehicles WHERE user_id = @user_id")
 MySQL.createCommand("vRP/get_vehicle","SELECT vehicle FROM vrp_user_vehicles WHERE user_id = @user_id AND vehicle = @vehicle")
+
 -- init
 MySQL.execute("vRP/vehicles_table")
 
@@ -77,21 +36,21 @@ for group,vehicles in pairs(vehicle_groups) do
 
   local menu = {
     name=lang.garage.title({group}),
-    css={top = "75px", header_color="rgba(64,158,221,0.75)"}
+    css={top = "75px", header_color="rgba(255,125,0,0.75)"}
   }
   garage_menus[group] = menu
 
   menu[lang.garage.owned.title()] = {function(player,choice)
     local user_id = vRP.getUserId(player)
     if user_id ~= nil then
-      --init tmpdata for rents
+      -- init tmpdata for rents
       local tmpdata = vRP.getUserTmpTable(user_id)
       if tmpdata.rent_vehicles == nil then
         tmpdata.rent_vehicles = {}
       end
 
 
-     --build nested menu
+      -- build nested menu
       local kitems = {}
       local submenu = {name=lang.garage.title({lang.garage.owned.title()}), css={top="75px",header_color="rgba(255,125,0,0.75)"}}
       submenu.onclose = function()
@@ -101,19 +60,18 @@ for group,vehicles in pairs(vehicle_groups) do
       local choose = function(player, choice)
         local vname = kitems[choice]
         if vname then
-        -- spawn vehicle
+          -- spawn vehicle
           local vehicle = vehicles[vname]
           if vehicle then
             vRP.closeMenu(player)
             TriggerEvent('ply_garages:CheckForSpawnBasicVeh', user_id, vname)
-		   -- vRPclient.spawnGarageVehicle(player,{veh_type,vname})
           end
         end
       end
       
-     -- get player owned vehicles
+      -- get player owned vehicles
       MySQL.query("vRP/get_vehicles", {user_id = user_id}, function(pvehicles, affected)
-      -- add rents to whitelist
+        -- add rents to whitelist
         for k,v in pairs(tmpdata.rent_vehicles) do
           if v then -- check true, prevent future neolua issues
             table.insert(pvehicles,{vehicle = k})
@@ -133,11 +91,11 @@ for group,vehicles in pairs(vehicle_groups) do
     end
   end,lang.garage.owned.description()}
 
- menu[lang.garage.buy.title()] = {function(player,choice)
+  menu[lang.garage.buy.title()] = {function(player,choice)
     local user_id = vRP.getUserId(player)
     if user_id ~= nil then
 
-     --build nested menu
+      -- build nested menu
       local kitems = {}
       local submenu = {name=lang.garage.title({lang.garage.buy.title()}), css={top="75px",header_color="rgba(255,125,0,0.75)"}}
       submenu.onclose = function()
@@ -147,12 +105,12 @@ for group,vehicles in pairs(vehicle_groups) do
       local choose = function(player, choice)
         local vname = kitems[choice]
         if vname then
-         -- buy vehicle
+          -- buy vehicle
           local vehicle = vehicles[vname]
-          if vehicle and vRP.tryFullPayment(user_id,vehicle[2]) then
-           MySQL.execute("vRP/add_vehicle", {user_id = user_id, vehicle = vname})
-               TriggerEvent('veh_SR:CheckMoneyForBasicVeh', user_id, vname, vehicle[2] ,veh_type)
-           vRPclient.notify(player,{lang.money.paid({vehicle[2]})})
+          if vehicle and vRP.tryPayment(user_id,vehicle[2]) then
+            MySQL.execute("vRP/add_vehicle", {user_id = user_id, vehicle = vname})
+
+            vRPclient.notify(player,{lang.money.paid({vehicle[2]})})
             vRP.closeMenu(player)
           else
             vRPclient.notify(player,{lang.money.not_enough()})
@@ -160,14 +118,14 @@ for group,vehicles in pairs(vehicle_groups) do
         end
       end
       
-     --get player owned vehicles (indexed by vehicle type name in lower case)
+      -- get player owned vehicles (indexed by vehicle type name in lower case)
       MySQL.query("vRP/get_vehicles", {user_id = user_id}, function(_pvehicles, affected)
         local pvehicles = {}
         for k,v in pairs(_pvehicles) do
           pvehicles[string.lower(v.vehicle)] = true
         end
 
-       -- for each existing vehicle in the garage group
+        -- for each existing vehicle in the garage group
         for k,v in pairs(vehicles) do
           if k ~= "_config" and pvehicles[string.lower(k)] == nil then -- not already owned
             submenu[v[1]] = {choose,lang.garage.buy.info({v[2],v[3]})}
@@ -178,7 +136,7 @@ for group,vehicles in pairs(vehicle_groups) do
         vRP.openMenu(player,submenu)
       end)
     end
- end,lang.garage.buy.description()}
+  end,lang.garage.buy.description()}
 
   menu[lang.garage.sell.title()] = {function(player,choice)
     local user_id = vRP.getUserId(player)
@@ -235,17 +193,17 @@ for group,vehicles in pairs(vehicle_groups) do
       end)
     end
   end,lang.garage.sell.description()}
--------------------------------------------------------------------------------------------------------------------------------------------------
+
   menu[lang.garage.rent.title()] = {function(player,choice)
     local user_id = vRP.getUserId(player)
     if user_id ~= nil then
-      --init tmpdata for rents
+      -- init tmpdata for rents
       local tmpdata = vRP.getUserTmpTable(user_id)
       if tmpdata.rent_vehicles == nil then
         tmpdata.rent_vehicles = {}
       end
 
-      --build nested menu
+      -- build nested menu
       local kitems = {}
       local submenu = {name=lang.garage.title({lang.garage.rent.title()}), css={top="75px",header_color="rgba(255,125,0,0.75)"}}
       submenu.onclose = function()
@@ -255,12 +213,12 @@ for group,vehicles in pairs(vehicle_groups) do
       local choose = function(player, choice)
         local vname = kitems[choice]
         if vname then
-          --rent vehicle
+          -- rent vehicle
           local vehicle = vehicles[vname]
           if vehicle then
             local price = math.ceil(vehicle[2]*cfg.rent_factor)
             if vRP.tryPayment(user_id,price) then
-             -- add vehicle to rent tmp data
+              -- add vehicle to rent tmp data
               tmpdata.rent_vehicles[vname] = true
 
               vRPclient.notify(player,{lang.money.paid({price})})
@@ -272,19 +230,19 @@ for group,vehicles in pairs(vehicle_groups) do
         end
       end
       
-      --get player owned vehicles (indexed by vehicle type name in lower case)
+      -- get player owned vehicles (indexed by vehicle type name in lower case)
       MySQL.query("vRP/get_vehicles", {user_id = user_id}, function(_pvehicles, affected)
         local pvehicles = {}
         for k,v in pairs(_pvehicles) do
           pvehicles[string.lower(v.vehicle)] = true
         end
 
-        --add rents to blacklist
+        -- add rents to blacklist
         for k,v in pairs(tmpdata.rent_vehicles) do
           pvehicles[string.lower(k)] = true
         end
 
-      -- for each existing vehicle in the garage group
+        -- for each existing vehicle in the garage group
         for k,v in pairs(vehicles) do
           if k ~= "_config" and pvehicles[string.lower(k)] == nil then -- not already owned
             local price = math.ceil(v[2]*cfg.rent_factor)
@@ -330,7 +288,7 @@ local function build_client_garages(source)
         end
 
         vRPclient.addBlip(source,{x,y,z,gcfg.blipid,gcfg.blipcolor,lang.garage.title({gtype})})
-        vRPclient.addMarker(source,{1,x,y,z-1,1.0,1.0,0.5,0,255,125,125,false,false,150})
+        vRPclient.addMarker(source,{x,y,z-1,0.7,0.7,0.5,0,255,125,125,150})
 
         vRP.setArea(source,"vRP:garage"..k,x,y,z,1,1.5,garage_enter,garage_leave)
       end
@@ -391,71 +349,67 @@ MySQL.createCommand("vRP/sell_vehicle_player","UPDATE vrp_user_vehicles SET user
 
 -- sell vehicle
 veh_actions[lang.vehicle.sellTP.title()] = {function(playerID,player,vtype,name)
-	if playerID ~= nil then
-		vRPclient.getNearestPlayers(player,{15},function(nplayers)
-			usrList = ""
-			for k,v in pairs(nplayers) do
-				usrList = usrList .. "[" .. vRP.getUserId(k) .. "]" .. GetPlayerName(k) .. " | "
-			end
-			if usrList ~= "" then
-				vRP.prompt(player,"Players Nearby: " .. usrList .. "","",function(player,user_id) 
-					user_id = user_id
-					if user_id ~= nil and user_id ~= "" then 
-						local target = vRP.getUserSource(tonumber(user_id))
-						if target ~= nil then
-							vRP.prompt(player,"Price $: ","",function(player,amount)
-								if (tonumber(amount)) then
-									MySQL.query("vRP/get_vehicle", {user_id = user_id, vehicle = name}, function(pvehicle, affected)
-										if #pvehicle > 0 then
-											vRPclient.notify(player,{"~r~The player already has this vehicle type."})
-										else
-											local tmpdata = vRP.getUserTmpTable(playerID)
-											if tmpdata.rent_vehicles[name] == true then
-												vRPclient.notify(player,{"~r~You cannot sell a rented vehicle!"})
-												return
-											else
-												vRP.request(target,GetPlayerName(player).." wants to sell: " ..name.. " Price: $"..amount, 10, function(target,ok)
-													if ok then
-														local pID = vRP.getUserId(target)
-														local money = vRP.getMoney(pID)
-														if (tonumber(money) >= tonumber(amount)) then
-															vRPclient.despawnGarageVehicle(player,{vtype,15}) 
-															vRP.getUserIdentity(pID, function(identity)
-																MySQL.execute("vRP/sell_vehicle_player", {user_id = user_id, registration = "P "..identity.registration, oldUser = playerID, vehicle = name}) 
-															end)
-															vRP.giveMoney(playerID, amount)
-															vRP.setMoney(pID,money-amount)
-															vRPclient.notify(player,{"~g~You have successfully sold the vehicle to ".. GetPlayerName(target).." for $"..amount.."!"})
-															vRPclient.notify(target,{"~g~"..GetPlayerName(player).." has successfully sold you the car for $"..amount.."!"})
-														else
-															vRPclient.notify(player,{"~r~".. GetPlayerName(target).." doesn't have enough money!"})
-															vRPclient.notify(target,{"~r~You don't have enough money!"})
-														end
-													else
-														vRPclient.notify(player,{"~r~"..GetPlayerName(target).." has refused to buy the car."})
-														vRPclient.notify(target,{"~r~You have refused to buy "..GetPlayerName(player).."'s car."})
-													end
-												end)
-											end
-											vRP.closeMenu(player)
-										end
-									end) 
-								else
-									vRPclient.notify(player,{"~r~The price of the car has to be a number."})
-								end
-							end)
-						else
-							vRPclient.notify(player,{"~r~That ID seems invalid."})
-						end
-					else
-						vRPclient.notify(player,{"~r~No player ID selected."})
-					end
-				end)
-			else
-				vRPclient.notify(player,{"~r~No player nearby."})
-			end
-		end)
-	end
+  if playerID ~= nil then
+    vRPclient.getNearestPlayers(player,{15},function(nplayers)
+      --vRPclient.getNearestOwnedVehicle(nplayer,{7},function(ok,vtype,name)
+        usrList = ""
+        for k,v in pairs(nplayers) do
+          usrList = usrList .. "[" .. vRP.getUserId(k) .. "]" .. GetPlayerName(k) .. " | "
+        end
+        if usrList ~= "" then
+          vRP.prompt(player,"Players Nearby: " .. usrList .. "","",function(player,user_id) 
+            user_id = user_id
+            if user_id ~= nil and user_id ~= "" then 
+              local target = vRP.getUserSource(tonumber(user_id))
+              if target ~= nil then
+                vRP.prompt(player,"Price $: ","",function(player,amount)
+                  if (tonumber(amount)) then
+                    MySQL.query("vRP/get_vehicle", {user_id = user_id, vehicle = name}, function(pvehicle, affected)
+                      if #pvehicle > 0 then
+                        vRPclient.notify(player,{"~r~The player already has this vehicle type."})
+                      else
+                        vRP.request(target,GetPlayerName(player).." wants to sell: " ..name.. " Price: $"..amount, 10, function(target,ok)
+                          if ok then
+                            local pID = vRP.getUserId(target)
+                            local money = vRP.getMoney(pID)
+                            if (tonumber(money) >= tonumber(amount)) then
+                              vRPclient.despawnGarageVehicle(player,{vtype,15}) 
+                              vRP.getUserIdentity(pID, function(identity)
+                                MySQL.execute("vRP/sell_vehicle_player", {user_id = user_id, registration = "P "..identity.registration, oldUser = playerID, vehicle = name}) 
+                              end)
+                              vRP.giveMoney(playerID, amount)
+                              vRP.setMoney(pID,money-amount)
+                              vRPclient.notify(player,{"~g~You have successfully sold the vehicle to ".. GetPlayerName(target).." for $"..amount.."!"})
+                              vRPclient.notify(target,{"~g~"..GetPlayerName(player).." has successfully sold you the car for $"..amount.."!"})
+                            else
+                              vRPclient.notify(player,{"~r~".. GetPlayerName(target).." doesn't have enough money!"})
+                              vRPclient.notify(target,{"~r~You don't have enough money!"})
+                            end
+                          else
+                            vRPclient.notify(player,{"~r~"..GetPlayerName(target).." has refused to buy the car."})
+                            vRPclient.notify(target,{"~r~You have refused to buy "..GetPlayerName(player).."'s car."})
+                          end
+                        end)
+                        vRP.closeMenu(player)
+                      end 
+                    end) 
+                  else
+                    vRPclient.notify(player,{"~r~The price of the car has to be a number."})
+                  end
+                end)
+              else
+                vRPclient.notify(player,{"~r~That ID seems invalid."})
+              end
+            else
+              vRPclient.notify(player,{"~r~No player ID selected."})
+            end
+          end)
+        else
+          vRPclient.notify(player,{"~r~No player nearby."})
+        end
+      --end)
+    end)
+  end
 end, lang.vehicle.sellTP.description()}
 
 local function ch_vehicle(player,choice)
