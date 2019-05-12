@@ -565,7 +565,7 @@ Citizen.CreateThread(function()
 				   while not HasModelLoaded(0xBE204C9B) or not HasCollisionForModelLoaded(0xBE204C9B) do
 				   Wait(1)
 				   end
-					   recelPed = CreatePed(4,0xBE204C9B,1208.36,-3117.00,5.54-1,60.25, true, true)	
+					   recelPed = CreatePed(4,0xBE204C9B,1208.36,-3117.00,5.54-1,60.25, true, true) 
 					   SetEntityInvincible(recelPed,1)					   
 					   FreezeEntityPosition(recelPed,1)
 					   SetBlockingOfNonTemporaryEvents(recelPed, true)
@@ -647,7 +647,7 @@ Citizen.CreateThread(function()
 	if IsPedJacking(GetPlayerPed(-1)) and IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then 
 	   SetPlayerWantedLevel(PlayerId(), 2, 0) 
 	   SetPlayerWantedLevelNow(PlayerId(), 0)
-	end	
+	end 
 	
  
 	if IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) and (not toolate) then
@@ -682,7 +682,7 @@ Citizen.CreateThread(function()
 	if not IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then 
 		if DoesBlipExist(delivery) then 
 		   RemoveBlip(delivery)
-		end	
+		end 
 	end
 	
 	if toolate then 
@@ -694,7 +694,7 @@ Citizen.CreateThread(function()
 		 RemoveBlip(delivery)
 	  end
 	 
-	end	
+	end 
 	
   end
 end)
