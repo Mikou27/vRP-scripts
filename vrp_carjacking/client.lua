@@ -1,3 +1,7 @@
+-----------------------------------------------------------
+--[[Original ###vrp_carjcaking### Script BY NéNé(mikou)]]--
+-----------------------------------------------------------
+
 vRP = Proxy.getInterface("vRP")
 vRPserver = Tunnel.getInterface("vRP", "vrp_carjacking")
 
@@ -8,37 +12,77 @@ local onfoot = false
 local vehspawn = false
 local incar = false
 local waypoint = false
-local timerdespawn = 0
+local Despawn_veh = 0
+local receler = false
 
 function vehicle_blip(entity)
-vehicle =  AddBlipForEntity(entity)
-		   SetBlipSprite(vehicle,595) 
-		   SetBlipColour(vehicle,3)
-		   BeginTextCommandSetBlipName("STRING")
-		   AddTextComponentString("Carjacking")
-		   EndTextCommandSetBlipName(vehicle)
+vehicle = AddBlipForEntity(entity)
+SetBlipSprite(vehicle,595) 
+SetBlipColour(vehicle,3)
+BeginTextCommandSetBlipName("STRING")
+AddTextComponentString("Carjacking")
+EndTextCommandSetBlipName(vehicle)
 end
 
 function despawn()
-toolate = true  	   
+toolate = true 
+Wait(2000)
+ClearPedTasksImmediately(GetPlayerPed(-1))
+ClearPedTasksImmediately(recelPed)
 Wait(10000)	   
-SetEntityAsNoLongerNeeded(DriverPed)	  
-SetModelAsNoLongerNeeded(GetHashKey(model))	   	   
+local model2 = GetEntityModel(DriverPed)					
+SetModelAsNoLongerNeeded(model2)
+SetEntityAsNoLongerNeeded(DriverPed)		   
 Wait(200)
+local model3 = GetEntityModel(SellableCar)					
+SetModelAsNoLongerNeeded(model3)
 SetEntityAsNoLongerNeeded(SellableCar)
-SetModelAsNoLongerNeeded(GetHashKey(model))
-DeleteEntity((SellableCar))
+DeleteEntity(SellableCar)
+Wait(15000)
+local model1 = GetEntityModel(recelPed)					
+SetModelAsNoLongerNeeded(model1)
+SetEntityAsNoLongerNeeded(recelPed)
+DeleteEntity(recelPed)
 end
 
 function despawntimer()
-toolate = true    
-vRP.notify({"~r~Le vehicule n'est plus recherché."})--vehicle not needed anymore   
-Wait(10000)	   
-SetEntityAsNoLongerNeeded(DriverPed)	  
-SetModelAsNoLongerNeeded(GetHashKey(model))	   
+toolate = true	  
+  if job and (not check) then
+	 vRP.notifyPicture({"CHAR_BLOCKED",4, "Infos", "","~r~Le vehicule n'est plus recherché."})
+  end
+  Wait(10000)	   
+  local model2 = GetEntityModel(DriverPed)					
+  SetModelAsNoLongerNeeded(model2)
+  SetEntityAsNoLongerNeeded(DriverPed)	  
+  Wait(200)
+  local model3 = GetEntityModel(SellableCar)					
+  SetModelAsNoLongerNeeded(model3) 
+  SetEntityAsNoLongerNeeded(SellableCar)
+end
+
+function leaveJob()
+toolate = true	  
+vRP.notifyPicture({"CHAR_BLOCKED",4, "Infos", "Vous avez changé de métier","~r~Vous ne pouvez plus vendre de véhicules carjackés."})
+SetEntityAsNoLongerNeeded(DriverPed)
+local model2 = GetEntityModel(DriverPed)					
+SetModelAsNoLongerNeeded(model2)		 
 Wait(200)
+local model3 = GetEntityModel(SellableCar)					
+SetModelAsNoLongerNeeded(model3)
 SetEntityAsNoLongerNeeded(SellableCar)
-SetModelAsNoLongerNeeded(GetHashKey(model))
+end
+
+function destroyed()
+  toolate = true	
+  if job and (not check)then
+	 vRP.notifyPicture({"CHAR_BLOCKED",4, "Infos", "","~r~Le vehicule ne vaut plus rien..."})--the vehicle is not valuable anymore 
+  end  
+   local model2 = GetEntityModel(DriverPed)					
+   SetModelAsNoLongerNeeded(model2)
+   SetEntityAsNoLongerNeeded(DriverPed)	 
+   local model3 = GetEntityModel(SellableCar)					
+   SetModelAsNoLongerNeeded(model3)
+   SetEntityAsNoLongerNeeded(SellableCar)
 end
 
 function drawTxt(x,y ,width,height,scale, text, r,g,b,a)
@@ -421,55 +465,49 @@ local drivermodels = {
 
 }
 
+-----------------[check/update perm]-------------------------
+RegisterNetEvent('carjacking_perm:OK')					   --
+AddEventHandler('carjacking_perm:OK', function(perm,noLoop)--
+  job = perm											   --
+  notLooped = noLoop									   --
+  if (not job) and (not toolate) and (not check) then	   --	 
+	 leaveJob()											   --
+	 check = true										   --
+  end													   --
+														   --
+  if job and (not notLooped) then						   --
+	 Wait(15000)										   --
+	 TriggerServerEvent('perm:carjacking')				   --
+  end													   --
+														   -- 
+end)													   --
+-------------------------------------------------------------
+
 Citizen.CreateThread(function()		   
- while true do
- timerpawn =  math.random(750000,850000)	 
- Wait(timerpawn)	
- if not DoesEntityExist(SellableCar) then 
-		vehspawn = true	 
- else	vehspawn = false	 
- end
--------------------------------------------  
- timerdespawn = math.random(750000,850000)
- Wait(timerdespawn)
- if DoesEntityExist(SellableCar) then
-	Wait(10000) 
-	despawntimer()
- else vehspawn = false
- end			
- end
-end)
-
-Citizen.CreateThread(function()	 
 while true do 
-Wait(1000)
-timerdespawn = timerdespawn-1000
-end
-end)
+-------------------[spawn timer]-------------------
+ Spawn_veh = math.random(60000,120000)			 -- 
+ Wait(Spawn_veh)								 --
+ TriggerServerEvent('perm:carjacking')			 --
+ Wait(200)										 --
+ if not DoesEntityExist(SellableCar) and job then-- 
+		vehspawn =	true						 --
+		receler = false							 --
+ end											 --
+---------------------------------------------------
 
-Citizen.CreateThread(function()	 
-while true do 
-Wait(0)
-if not toolate and incar then	 
-local timer = math.floor(timerdespawn/1000)
-RequestStreamedTextureDict("timerbars",1)
-	while not HasStreamedTextureDictLoaded("timerbars")	 do
-	Wait(1)
-	end
-	
-RequestStreamedTextureDict("mpmissmarkers256",1)
-	while not HasStreamedTextureDictLoaded("mpmissmarkers256")	 do
-	Wait(1)
-	end
-
-DrawSprite("timerbars", "all_black_bg", 0.05, 0.731,-0.25, -0.024, 0.1, 20, 55, 200, 255)
-DrawSprite("mpmissmarkers256", "timetrial_icon", 0.015, 0.733,0.022, 0.022, 0.19, 255, 255, 255, 255)
-if timer > 240 then secondes = " ~g~s";left = "Reste : ~g~" elseif timer < 240 and timer >120 then secondes = " ~o~s";left = "Reste: ~o~" elseif timer < 120 then secondes = " ~r~s";left = "Reste: ~r~" end
-drawTxt(0.53, 1.216, 1.0,1.0,0.30,left..timer..secondes , 255, 255, 255, 255)
-DrawMarker(1,1204.52, -3115.68, 4.54,0,0,0,0,0,0,6.0,6.0,0.5001,5,217,241,0.75,0,0,0,0)
-DrawMarker(4,1204.52, -3115.68, 5.74,0,0,0,0,0,0,2.5,2.5,1.5001,5,217,241,0.75,0,0,0,0)
-end	
-end
+----------------[despawn timer]--------------------	   
+ Despawn_veh = math.random(350000,550000)		 --
+ Wait(Despawn_veh)								 --
+ if DoesEntityExist(SellableCar) then			 -- 
+	 Wait(10000)								 -- 
+	 despawntimer()								 --
+	 check = false								 -- 
+ else											 --
+	vehspawn = false							 --
+ end											 --
+---------------------------------------------------
+end 
 end)
 
 Citizen.CreateThread(function()
@@ -477,7 +515,7 @@ Citizen.CreateThread(function()
    Wait(0)
  
 	if vehspawn then 
-       
+	   
 	 vehmodel = vehmodels[math.random(1, #vehmodels)]
 	 vehmodel = string.upper(vehmodel)
 	 RequestModel(GetHashKey(vehmodel))
@@ -505,8 +543,10 @@ Citizen.CreateThread(function()
 	 vehicle_blip(SellableCar)		 
 	 vehspawn = false	
 	 toolate = false
-     vRP.notify({"~g~Un véhicule intéressant vient d'être repéré."})
+	 vRP.notifyPicture({"CHAR_HUMANDEFAULT",4, "Informateur", "~r~Un sale boulot.","~g~Un véhicule intéressant vient d'être repéré."})
 	end		
+	
+	
 	
 	if DoesEntityExist(SellableCar) and (not IsPedInVehicle(GetPlayerPed(-1),SellableCar,1)) and (not toolate) then 
 	   local vehpos = GetEntityCoords(SellableCar)
@@ -514,40 +554,62 @@ Citizen.CreateThread(function()
 	end	  
 	
 	if not toolate then	 
-	 if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,2.5,2.5, 4.0, 0, 1, 0) then				 
+	 if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,10.5,10.5, 4.0, 0, 1, 0) then				 
 		 if IsPedInModel(GetPlayerPed(-1),GetHashKey(vehmodel)) then 
 			 if IsPlayerWantedLevelGreater(PlayerId(),0) then
 				
 				 TriggerServerEvent('flic_notok:veh')
 			 else
-				 
-				 Class = GetVehicleClass(SellableCar)			 
-				 Damage = GetEntityHealth(SellableCar)/1000 
-				 SetVehicleUndriveable(SellableCar,1)
-				 TriggerServerEvent('descendre_ok:veh')
-				 onfoot = true
+				if not receler then 
+				   RequestModel(0xBE204C9B)
+				   while not HasModelLoaded(0xBE204C9B) or not HasCollisionForModelLoaded(0xBE204C9B) do
+				   Wait(1)
+				   end
+					   recelPed = CreatePed(4,0xBE204C9B,1208.36,-3117.00,5.54-1,60.25, true, true)	
+					   SetEntityInvincible(recelPed,1)					   
+					   FreezeEntityPosition(recelPed,1)
+					   SetBlockingOfNonTemporaryEvents(recelPed, true)
+					   receler = true
+				 end
+				if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,2.5,2.5, 4.0, 0, 1, 0) then
+				   Class = GetVehicleClass(SellableCar)			 
+				   Damage = GetEntityHealth(SellableCar)/1000 
+				   SetVehicleUndriveable(SellableCar,1)
+				   TriggerServerEvent('descendre_ok:veh')
+				   onfoot = true
+				 end
 			 end
 		 end
 	  end
 	end 
 	  
 	if onfoot then
-	  if IsPedOnFoot(GetPlayerPed(-1)) then 
-		 TriggerServerEvent('deposit_ok:give',Class,Damage)
-		 TriggerServerEvent('taff_ok:veh')
-		 despawn()
-		 onfoot = false
-	   end
+	  SetVehicleDoorsLocked(SellableCar,2)
+	  local pedpos = GetEntityCoords(recelPed)
+	  DrawMarker(0, pedpos.x, pedpos.y, pedpos.z+1.5, 0.0, 0.0,0.0, 0.0, 0.0,0.0, 0.3, 0.3, 0.35, 5,217,241, 100, 1, 0, 2, 0, 0, 0, 0)
+	  if DoesEntityExist(SellableCar) and IsPedOnFoot(GetPlayerPed(-1)) then 
+		if IsEntityAtCoord(GetPlayerPed(-1), pedpos.x, pedpos.y, pedpos.z,0.80,0.80, 4.0, 0, 1, 0) then--recelPed pos
+		  RequestAnimDict("mp_common")
+		   while not HasAnimDictLoaded("mp_common") do
+			Wait(1)
+			end
+			TaskPlayAnim(recelPed,"mp_common","givetake2_b", 2.5,0.0, 1000, 16, 0.0, false, false, false)
+			TaskPlayAnim(GetPlayerPed(-1),"mp_common","givetake2_b", 2.5,0.0, 1000, 16, 0.0, false, false, false)
+			TriggerServerEvent('deposit_ok:give',Class,Damage)
+			TriggerServerEvent('taff_ok:veh')
+			despawn()
+			onfoot = false
+		end
+	  end
 	end
 
 	
 	if GetEntityHealth(SellableCar) <= 700	then --valuable threshold
 	   if not toolate then
-			  vRP.notify({"~r~Le vehicule ne vaut plus rien..."})--the vehicle is not valuable anymore
-			  despawntimer()
+		 destroyed()
 	   end
 	end 
-	--vehicle statut bar--	  		  
+	--------------------------------------vehicle statut bar----------------------------------------			  
 	currenthealth = GetEntityHealth(SellableCar)
 	health = (currenthealth-700)		   
 		
@@ -575,12 +637,12 @@ Citizen.CreateThread(function()
 	  if currenthealth >= 701 then		  
 		 DrawSprite("timerbars", "all_black_bg", 0.05, 0.7555,-0.25, -0.025, 0.1, 20, 55, 200, 255)
 		 DrawRect(health/4500, 0.755, -health/2000, 0.015, r, g, b, 255)
-		 drawTxt(0.525, 1.239, 1.0,1.0,0.27, "~w~Etat du véhicule", 255, 255, 255, 255)--damages level
+		 drawTxt(0.525, 1.239, 1.0,1.0,0.27, "		~w~Dégâts", 255, 255, 255, 255)--damages level(use space for text alignement)
 		 DrawSprite("timerbars", "all_black_bg", 0.009, 0.7555,-0.1, -0.025, 0.1, 20, 55, 100, 190)
 	  end
 	 end
 	end
-    -------------------
+	-------------------------------------------------------------------------------------------------
 	
 	if IsPedJacking(GetPlayerPed(-1)) and IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then 
 	   SetPlayerWantedLevel(PlayerId(), 2, 0) 
@@ -588,13 +650,16 @@ Citizen.CreateThread(function()
 	end	
 	
  
-	if IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) then
+	if IsPedInVehicle(GetPlayerPed(-1),SellableCar,0) and (not toolate) then
 		 if not waypoint then
 		 SetNewWaypoint(1204.52, -3115.68)
 		 waypoint = true
 		 end
 		 incar = true 
-	else incar = false
+	else 
+		 incar = false
+		 waypoint = false
+	
 	end
 	 
 	 
@@ -603,12 +668,12 @@ Citizen.CreateThread(function()
 		if incar then
 		   Wait(200)
 		   delivery = AddBlipForCoord(1204.52, -3115.68, 5.54)
-					   SetBlipSprite(delivery,38)
-					   SetBlipColour(delivery,12)
-					   SetBlipFlashes(delivery,1)
-					   BeginTextCommandSetBlipName("STRING")
-					   AddTextComponentString("Livraison carjacking")--set name of the delivery place
-					   EndTextCommandSetBlipName(delivery)
+					  SetBlipSprite(delivery,38)
+					  SetBlipColour(delivery,12)
+					  SetBlipFlashes(delivery,1)
+					  BeginTextCommandSetBlipName("STRING")
+					  AddTextComponentString("Livraison carjacking")--set name of the delivery place
+					  EndTextCommandSetBlipName(delivery)
 		end			   
 	  end 
 	end
@@ -633,4 +698,37 @@ Citizen.CreateThread(function()
 	
   end
 end)
-  
+--------------------------------------------------------------------------------------------[timer]------------------------------------------------------------------------------------------------------------------
+Citizen.CreateThread(function()																																													   --
+while true do																																																	   --
+  Wait(1000)																																																	   --
+ Despawn_veh = Despawn_veh -1000																																												   --
+end																																																				   --
+end)																																																			   --
+																																																				   --
+Citizen.CreateThread(function()																																													   --
+while true do																																																	   --
+Wait(0)																																																			   --
+  if not toolate and incar	then																																												   --
+	 local timer = math.floor(Despawn_veh/1000)																																									   --
+	 RequestStreamedTextureDict("timerbars",1)																																									   --
+	 while not HasStreamedTextureDictLoaded("timerbars") do																																						   --
+	 Wait(1)																																																	   --
+	 end																																																		   --
+																																																				   --
+	 RequestStreamedTextureDict("mpmissmarkers256",1)																																							   --
+	 while not HasStreamedTextureDictLoaded("mpmissmarkers256")	 do																																				   --
+	 Wait(1)																																																	   --
+	 end																																																		   --
+																																																				   --
+	 DrawSprite("timerbars", "all_black_bg", 0.05, 0.731,-0.25, -0.024, 0.1, 20, 55, 200, 255)																													   --
+	 DrawSprite("mpmissmarkers256", "timetrial_icon", 0.015, 0.733,0.022, 0.022, 0.19, 255, 255, 255, 255)																										   --
+																																																				   --
+	 if timer > 240 then secondes = " ~g~s";left = "Reste : ~g~" elseif timer < 240 and timer >120 then secondes = " ~o~s";left = "Reste: ~o~" elseif timer < 120 then secondes = " ~r~s";left = "Reste: ~r~" end  --
+		drawTxt(0.53, 1.216, 1.0,1.0,0.30,left..timer..secondes , 255, 255, 255, 255)																															   --
+		DrawMarker(1,1204.52, -3115.68, 4.54,0,0,0,0,0,0,6.0,6.0,0.5001,5,217,241,0.75,0,0,0,0)																													   --
+		DrawMarker(4,1204.52, -3115.68, 5.74,0,0,0,0,0,0,2.5,2.5,1.5001,5,217,241,0.75,0,0,0,0)																													   --
+	 end																																																		   --
+   end																																																			   --
+end)																																																			   --
+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
