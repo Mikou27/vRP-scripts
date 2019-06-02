@@ -14,6 +14,7 @@ local incar = false
 local waypoint = false
 local Despawn_veh = 0
 local receler = false
+local arrived = false
 
 function vehicle_blip(entity)
 vehicle = AddBlipForEntity(entity)
@@ -22,10 +23,13 @@ SetBlipColour(vehicle,3)
 BeginTextCommandSetBlipName("STRING")
 AddTextComponentString("Carjacking")
 EndTextCommandSetBlipName(vehicle)
+collectgarbage("collect")
 end
 
 function despawn()
 toolate = true 
+Spawn_veh = 0
+Despawn_veh = 0
 Wait(2000)
 ClearPedTasksImmediately(GetPlayerPed(-1))
 ClearPedTasksImmediately(recelPed)
@@ -43,6 +47,7 @@ local model1 = GetEntityModel(recelPed)
 SetModelAsNoLongerNeeded(model1)
 SetEntityAsNoLongerNeeded(recelPed)
 DeleteEntity(recelPed)
+collectgarbage("collect")
 end
 
 function despawntimer()
@@ -58,6 +63,7 @@ toolate = true
   local model3 = GetEntityModel(SellableCar)					
   SetModelAsNoLongerNeeded(model3) 
   SetEntityAsNoLongerNeeded(SellableCar)
+  collectgarbage("collect")
 end
 
 function leaveJob()
@@ -70,6 +76,7 @@ Wait(200)
 local model3 = GetEntityModel(SellableCar)					
 SetModelAsNoLongerNeeded(model3)
 SetEntityAsNoLongerNeeded(SellableCar)
+collectgarbage("collect")
 end
 
 function destroyed()
@@ -83,6 +90,7 @@ function destroyed()
    local model3 = GetEntityModel(SellableCar)					
    SetModelAsNoLongerNeeded(model3)
    SetEntityAsNoLongerNeeded(SellableCar)
+   collectgarbage("collect")
 end
 
 function drawTxt(x,y ,width,height,scale, text, r,g,b,a)
@@ -97,6 +105,7 @@ SetTextOutline()
 SetTextEntry("STRING")
 AddTextComponentString(text)
 DrawText(x - width/2, y - height/2 + 0.005)
+collectgarbage("collect")
 end
 
 local positions = { -- spawn positions
@@ -479,35 +488,40 @@ AddEventHandler('carjacking_perm:OK', function(perm,noLoop)--
 	 Wait(15000)										   --
 	 TriggerServerEvent('perm:carjacking')				   --
   end													   --
-														   -- 
+  collectgarbage("collect")								   -- 
 end)													   --
 -------------------------------------------------------------
 
 Citizen.CreateThread(function()		   
 while true do 
 -------------------[spawn timer]-------------------
- Spawn_veh = math.random(60000,120000)			 -- 
+ Spawn_veh = math.random(850000,920000)			 -- 
  Wait(Spawn_veh)								 --
  TriggerServerEvent('perm:carjacking')			 --
  Wait(200)										 --
  if not DoesEntityExist(SellableCar) and job then-- 
 		vehspawn =	true						 --
 		receler = false							 --
+		arrived = false							 --
+												 --
  end											 --
 ---------------------------------------------------
 
 ----------------[despawn timer]--------------------	   
- Despawn_veh = math.random(350000,550000)		 --
+ Despawn_veh = math.random(550000,650000)		 --
  Wait(Despawn_veh)								 --
  if DoesEntityExist(SellableCar) then			 -- 
 	 Wait(10000)								 -- 
 	 despawntimer()								 --
-	 check = false								 -- 
+	 check = false								 --
+												 -- 
  else											 --
 	vehspawn = false							 --
  end											 --
 ---------------------------------------------------
+ 
 end 
+collectgarbage("collect")
 end)
 
 Citizen.CreateThread(function()
@@ -571,11 +585,12 @@ Citizen.CreateThread(function()
 					   SetBlockingOfNonTemporaryEvents(recelPed, true)
 					   receler = true
 				 end
-				if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,2.5,2.5, 4.0, 0, 1, 0) then
+				if IsEntityAtCoord(GetPlayerPed(-1),1204.52, -3115.68, 5.54,2.5,2.5, 4.0, 0, 1, 0) and not arrived then
 				   Class = GetVehicleClass(SellableCar)			 
 				   Damage = GetEntityHealth(SellableCar)/1000 
 				   SetVehicleUndriveable(SellableCar,1)
 				   TriggerServerEvent('descendre_ok:veh')
+				   arrived = true
 				   onfoot = true
 				 end
 			 end
@@ -633,11 +648,11 @@ Citizen.CreateThread(function()
 	end
 	
 	if not toolate then
-	 if incar then					   
+	 if incar and not arrived then					   
 	  if currenthealth >= 701 then		  
 		 DrawSprite("timerbars", "all_black_bg", 0.05, 0.7555,-0.25, -0.025, 0.1, 20, 55, 200, 255)
 		 DrawRect(health/4500, 0.755, -health/2000, 0.015, r, g, b, 255)
-		 drawTxt(0.525, 1.239, 1.0,1.0,0.27, "		~w~Dégâts", 255, 255, 255, 255)--damages level(use space for text alignement)
+		 drawTxt(0.525, 1.239, 1.0,1.0,0.27, "	~w~Dégâts", 255, 255, 255, 255)--damages level(use space for text alignement)
 		 DrawSprite("timerbars", "all_black_bg", 0.009, 0.7555,-0.1, -0.025, 0.1, 20, 55, 100, 190)
 	  end
 	 end
@@ -695,21 +710,24 @@ Citizen.CreateThread(function()
 	  end
 	 
 	end 
-	
+	  
   end
+  collectgarbage("collect")
 end)
 --------------------------------------------------------------------------------------------[timer]------------------------------------------------------------------------------------------------------------------
 Citizen.CreateThread(function()																																													   --
 while true do																																																	   --
   Wait(1000)																																																	   --
- Despawn_veh = Despawn_veh -1000																																												   --
+ Despawn_veh = Despawn_veh -1000																																												   --											 --
 end																																																				   --
+collectgarbage("collect")																																														   --				   --
 end)																																																			   --
+																																																				   --
 																																																				   --
 Citizen.CreateThread(function()																																													   --
 while true do																																																	   --
 Wait(0)																																																			   --
-  if not toolate and incar	then																																												   --
+  if not toolate and incar and not arrived	then																																								   --				   --
 	 local timer = math.floor(Despawn_veh/1000)																																									   --
 	 RequestStreamedTextureDict("timerbars",1)																																									   --
 	 while not HasStreamedTextureDictLoaded("timerbars") do																																						   --
@@ -728,7 +746,12 @@ Wait(0)																																																			   --
 		drawTxt(0.53, 1.216, 1.0,1.0,0.30,left..timer..secondes , 255, 255, 255, 255)																															   --
 		DrawMarker(1,1204.52, -3115.68, 4.54,0,0,0,0,0,0,6.0,6.0,0.5001,5,217,241,0.75,0,0,0,0)																													   --
 		DrawMarker(4,1204.52, -3115.68, 5.74,0,0,0,0,0,0,2.5,2.5,1.5001,5,217,241,0.75,0,0,0,0)																													   --
+																																																				   --
 	 end																																																		   --
+																																																				   --
    end																																																			   --
+	collectgarbage("collect")																																													   --
 end)																																																			   --
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ 

@@ -35,7 +35,7 @@ vRPclient = Tunnel.getInterface("vRP","vrp_carjacking")
 
 local Class = {}
 local Damage = {}
-
+local notif = false
 
 --[!!!Only set one boolean true at once!!!]--
 										   --
@@ -73,6 +73,7 @@ local user_id = vRP.getUserId({source})						 --
 		 TriggerClientEvent('carjacking_perm:OK',source,perm)--
 	  end													 --
 	end														 --
+	collectgarbage("collect")								 --
 end)														 --
 end															 --
 ---------------------------------------------------------------
@@ -94,6 +95,7 @@ local user_id = vRP.getUserId({source})									 --
 		 TriggerClientEvent('carjacking_perm:OK',source,perm)			 --
 	  end																 --
 	end																	 --
+	collectgarbage("collect")											 --
 end)																	 --
 end																		 --
 ---------------------------------------------------------------------------
@@ -115,6 +117,7 @@ local user_id = vRP.getUserId({source})																			--
 		 TriggerClientEvent('carjacking_perm:OK',source,perm)													--
 	  end																										--
 	end																											--
+	collectgarbage("collect")																					--
 end)																											--
 end																												--
 ------------------------------------------------------------------------------------------------------------------
@@ -125,7 +128,8 @@ RegisterServerEvent('perm:carjacking')						 --
 AddEventHandler('perm:carjacking', function()				 --											 
 local perm = true											 --
 local noLoop = true											 --
-TriggerClientEvent('carjacking_perm:OK',source,perm,noLoop)	 --																												 
+TriggerClientEvent('carjacking_perm:OK',source,perm,noLoop)	 --
+collectgarbage("collect")									 --																												 
 end)														 --
 end															 --
 ---------------------------------------------------------------
@@ -194,7 +198,9 @@ local user_id = vRP.getUserId({source})
 			vRP.giveInventoryItem({user_id,"dirty_money",math.floor(math.random(1500,6000)*Damage),1})			
 			--vRP.varyExp({user_id,"criminel","braquage",2}) 
 	 end	
+	 
   end
+  collectgarbage("collect")	 
 end)
 
 RegisterServerEvent('descendre_ok:veh')
@@ -203,9 +209,12 @@ local user_id = vRP.getUserId({source})
 local player = vRP.getUserSource({user_id})
    
    if(user_id)then
+	 if not notif then
 	  vRPclient.notifyPicture(player,{"CHAR_BLOCKED",4, "Infos", "","~w~Descends du ~b~vehicule et vas voir le receleur."})	--get out
+	  notif = true
+	 end
    end
-
+   collectgarbage("collect")  
 end)
 
 RegisterServerEvent('taff_ok:veh')
@@ -215,8 +224,9 @@ local player = vRP.getUserSource({user_id})
    
    if(user_id)then
 	  vRPclient.notifyPicture(player,{"CHAR_JOE",4, "Receleur", "Vous dit...",'"~g~Beau boulot! Reviens quand tu veux."'})--good job
+	  notif = false
    end
-
+   collectgarbage("collect")  
 end)
 
 RegisterServerEvent('flic_notok:veh')
@@ -227,5 +237,5 @@ local player = vRP.getUserSource({user_id})
    if(user_id)then
 	   vRPclient.notifyPicture(player,{"CHAR_JOE",4, "Receleur", "Vous dit...",'"~w~Sémes les ~r~flics ~w~et reviens."'})--must clear your wanted level
    end
-
+   collectgarbage("collect")  
 end)
