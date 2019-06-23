@@ -28,8 +28,10 @@ vRPserver = Tunnel.getInterface("vRP","vrp-Gruppe6Robbing")
 
 local spawn = false
 local money = false
+local check = false
 
 function despawn()
+check = false
 Wait(120000)
 SetEntityAsNoLongerNeeded(Armored_truck)
 SetModelAsNoLongerNeeded(0x6827CF72)
@@ -143,6 +145,7 @@ Citizen.CreateThread(function()
        blipName(Ar_truck_blip,Armored_truck,67,2,onMapBlipName_truck)
        vRP.notifyPicture({"CHAR_HUMANDEFAULT",4,spawnNotif.contact,spawnNotif.title,spawnNotif.msg})
        spawn = false
+	   check = true
     end
 
 
@@ -182,7 +185,7 @@ Citizen.CreateThread(function()
            despawn()
         end
 
-        if DoesEntityExist(Armored_truck) and GetEntityHealth(Armored_truck) < 1 and (not spawn) then
+        if DoesEntityExist(Armored_truck) and GetEntityHealth(Armored_truck) < 1 and check then
            removeblip(Ar_truck)
            vRP.notify({destroyedTruckNotif.notif})
            if DoesEntityExist(money_bag) then
