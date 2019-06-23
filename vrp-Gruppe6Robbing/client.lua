@@ -16,7 +16,7 @@ local spawnNotif = {contact = "Informateur",
                     title = "~r~Un sale boulot.",
                     msg = "~g~Un fourgon blindé vient d'être repéré,prépares tes bombes collantes."
                     }
-                    
+
 local onMapBlipName_truck = "Fourgon blindé"
 local onMapBlipName_money = "Sac d'argent sale"
 local destroyedTruckNotif = {notif = "~r~L'argent a était détruit."}
@@ -54,19 +54,19 @@ BeginTextCommandSetBlipName("STRING")
 AddTextComponentString(text)
 EndTextCommandSetBlipName(name)
 return name
-end 
+end
 
 function blipName(name,entity,sprite,color,text)
 blips.name = addBlip(name,entity,sprite,color,text)
 return blips
 end
 
-function removeblip(name) 
-if blips.name ~= nil then 
+function removeblip(name)
+if blips.name ~= nil then
    RemoveBlip(blips.name)
    blips.name = nil
 end
- end
+end
 
 function modelRequest(model)
  RequestModel(model)
@@ -145,7 +145,7 @@ Citizen.CreateThread(function()
        blipName(Ar_truck_blip,Armored_truck,67,2,onMapBlipName_truck)
        vRP.notifyPicture({"CHAR_HUMANDEFAULT",4,spawnNotif.contact,spawnNotif.title,spawnNotif.msg})
        spawn = false
-	   check = true
+       check = true
     end
 
 
