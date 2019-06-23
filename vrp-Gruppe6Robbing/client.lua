@@ -5,14 +5,18 @@
 -----------------------------------[[[SETTINGS]]]-------------------------------------
 --------------------------------------------------------------------------------------
 ---------------[SPAWN TIMER]----------------
-local spawnTimer =  5000--math.random(1200000,1600000)
+local spawnTimer =  math.random(1200000,1600000)
 --------------------------------------------
 
 ---------------[DESPAWN TIMER]-------------------
 local despawnTimer = math.random(1200000,1600000)
 -------------------------------------------------
 ---------------------------------------[TEXTS]----------------------------------------
-local spawnNotif = {contact = "Informateur",title = "~r~Un sale boulot.",msg = "~g~Un fourgon blindé vient d'être repéré,prépares tes bombes collantes."}
+local spawnNotif = {contact = "Informateur",
+                    title = "~r~Un sale boulot.",
+                    msg = "~g~Un fourgon blindé vient d'être repéré,prépares tes bombes collantes."
+                    }
+                    
 local onMapBlipName_truck = "Fourgon blindé"
 local onMapBlipName_money = "Sac d'argent sale"
 local destroyedTruckNotif = {notif = "~r~L'argent a était détruit."}
