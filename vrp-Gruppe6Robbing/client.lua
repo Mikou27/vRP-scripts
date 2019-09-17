@@ -1,35 +1,36 @@
-
 --[[Original script [vrp-Gruppe6Robbing] by NENE(mikou)]]--
 ---https://forum.fivem.net/t/release-vrp-gruppe6robbing-gruppe6-armored-truck-robbing/290234
 
+vRP = Proxy.getInterface("vRP")
+vRPserver = Tunnel.getInterface("vRP","vrp-Gruppe6Robbing")
+
 -----------------------------------[[[SETTINGS]]]-------------------------------------
 --------------------------------------------------------------------------------------
----------------[SPAWN TIMER]----------------
-local spawnTimer =  math.random(1200000,1600000)
---------------------------------------------
+---------------[SPAWN TIMER]---------------------
+local spawnTimer = math.random(1200000,1600000)
+-------------------------------------------------
 
 ---------------[DESPAWN TIMER]-------------------
 local despawnTimer = math.random(1200000,1600000)
 -------------------------------------------------
+
 ---------------------------------------[TEXTS]----------------------------------------
 local spawnNotif = {
-
 contact = "Informateur",
 title = "~r~Un sale boulot.",
 msg = "~g~Un fourgon blindé vient d'être repéré,prépares tes bombes collantes."
-
 }
 
+local rewardnotif = {"Vous avez reçu ~g~"," ~w~$ d'argent sale."}
 local onMapBlipName_truck = "Fourgon blindé"
 local onMapBlipName_money = "Sac d'argent sale"
-local destroyedTruckNotif = {notif = "~r~L'argent a était détruit."}
-local moneyPickup = {pickup = "~y~L'argent a était ramassé." }
+local destroyedTruckNotif = "~r~L'argent a était détruit."
+local moneyPickup =  "~y~L'argent a était ramassé." 
+local failNotif = "~y~Le butin d'un braquage de fourgon n'a pas était ramassé faites vite!~g~(3min)"
 --------------------------------------------------------------------------------------
 --------------------------------------------------------------------------------------
---------------------------------------------------------------------------------------
-vRP = Proxy.getInterface("vRP")
-vRPserver = Tunnel.getInterface("vRP","vrp-Gruppe6Robbing")
 
+--------------------------------[Variables]-------------------------------------------
 local truckBlip = false
 local moneyBlip = false
 local spawn = false
@@ -37,12 +38,36 @@ local money = false
 local check = false
 local near = false
 local notif = false
+local door = false
+local fail = false
+---------------------------------------------------------------------------------------
+--------------------------------[functions]--------------------------------------------
+function Notification(text)
+SetNotificationTextEntry("STRING")
+AddTextComponentString(text)
+DrawNotification(false, false)
+end
+
+function IconNotif(sprite,style,contact,title,text)
+SetNotificationTextEntry("STRING")
+AddTextComponentString(text)
+SetNotificationMessage(sprite,sprite,true,style,contact,title, text)
+DrawNotification(false, true)
+end
 
 function despawn()
+if fail then 
+   Notification(failNotif)
+   Wait(180000)
+   fail = false
+   DeleteObject(thisBag)
+end
 truckBlip = false
 moneyBlip = false
+door = false
 SetEntityAsNoLongerNeeded(thisTruck)
 SetModelAsNoLongerNeeded(0x6827CF72)
+T_toNet = nil
 Wait(120000)
 SetEntityAsNoLongerNeeded(driver)
 SetModelAsNoLongerNeeded(0xCDEF5408)
@@ -87,12 +112,13 @@ function start_reset()
  spawn = true
  money = false
 end
-
+-------------------------------------------------------------------------------------
+-----------------------------------[Table]-------------------------------------------
 local positions = {--spawn position
 {x=241.11,y=-1018.93,z=29.23,h=335.10},
 {x=-387.61,y=-376.46,z=31.76,h=81.07},
 {x=-984.17,y=-831.63,z=15.49,h=237.51},
-{x=552.48,y=256.65,z=103.06,h=248.65},
+{x=543.39,y=249.37,z=103.10,h=249.54},
 {x=258.84,y=-1697.63,z=29.11,h=317.59},
 {x=-1624.92,y=-428.73,z=39.65,h=320.0},
 {x=-295.99,y=-204.59,z=33.18,h=38.22},
@@ -114,20 +140,8 @@ local positions = {--spawn position
 {x=-255.95,y=-777.38,z=32.53,h=337.59}
 
 }
-RegisterNetEvent('sharedID')
-AddEventHandler('sharedID', function(T_ID)
- T_toNet = T_ID
-end)
+---------------------------------------------------------------------------------------
 
-RegisterNetEvent('sharedObj')
-AddEventHandler('sharedObj', function(O_ID)
- O_toNet = O_ID
-end)
-
-RegisterNetEvent('sharedPos')
-AddEventHandler('sharedPos', function(nearMoney)
-  near = nearMoney
-end)
 
 Citizen.CreateThread(function()
  while true do
@@ -155,7 +169,7 @@ Citizen.CreateThread(function()
        modelRequest(0xCDEF5408)
 
        local pos = positions[math.random(1, #positions)]
-       Armored_truck = CreateVehicle(0x6827CF72, pos.x,pos.y,pos.z,pos.h, true, true)      ---fourgon blindé "stockade"
+       Armored_truck = CreateVehicle(0x6827CF72, pos.x,pos.y,pos.z,pos.h, true, true) -- "stockade"
        SetVehicleOnGroundProperly( Armored_truck)
        Citizen.InvokeNative(0x06FAACD625D80CAA, Armored_truck)
        driver = CreatePed(4, 0xCDEF5408,pos.x,pos.y,pos.z,pos.h, true, true)
@@ -170,6 +184,7 @@ Citizen.CreateThread(function()
        SetPedFleeAttributes(passenger, 0, 1)
        GiveWeaponToPed(driver, GetHashKey("WEAPON_PUMPSHOTGUN"),-1,0,1)
        GiveWeaponToPed(passenger, GetHashKey("WEAPON_PUMPSHOTGUN"),-1,0,1)
+	   Wait(200)
        TruckID = VehToNet(Armored_truck)
        Citizen.InvokeNative(0xE05E81A888FA63C8,TruckID,1)
        Wait(250)
@@ -178,11 +193,11 @@ Citizen.CreateThread(function()
 
    end
 
-   if NetworkDoesNetworkIdExist(T_toNet) then
-      thisTruck = NetToVeh(T_toNet)
+   if NetworkDoesNetworkIdExist(T_toNet) then     
       if not truckBlip then
+	     thisTruck = NetToVeh(T_toNet)
          blipName(Ar_truck_blip,thisTruck,67,2,onMapBlipName_truck)
-         vRP.notifyPicture({"CHAR_HUMANDEFAULT",4,spawnNotif.contact,spawnNotif.title,spawnNotif.msg})
+		 IconNotif("CHAR_HUMANDEFAULT",4,spawnNotif.contact,spawnNotif.title,spawnNotif.msg)
          check = true
          truckBlip = true
       end
@@ -190,34 +205,43 @@ Citizen.CreateThread(function()
       local pickupos = GetOffsetFromEntityInWorldCoords(thisTruck,0.0,-4.5,0.0)
       local obj = GetEntityCoords(thisBag)
 
-        if GetVehicleDoorAngleRatio(thisTruck,2) >= 0.0100 and GetVehicleDoorAngleRatio(thisTruck,3) >= 0.0100 then
+        if GetVehicleDoorAngleRatio(thisTruck,2) >= 0.0100 and GetVehicleDoorAngleRatio(thisTruck,3) >= 0.0100 and (not door) then
+		    local robPos = GetEntityCoords(thisTruck)
+			local zone = GetNameOfZone(robPos.x,robPos.y,robPos.z)
+		    TriggerServerEvent('Cops',robPos.x,robPos.y,robPos.z,zone)
             TaskCombatPed(driver,GetPlayerPed(-1),0,16)
             TaskCombatPed(passenger,GetPlayerPed(-1),0,16)
             removeblip(Ar_truck)
-
+            
             if not money then
               if GetPlayerWantedLevel(PlayerId()) <= 4 then
                  SetPlayerWantedLevel(PlayerId(), 4, 0)
                  SetPlayerWantedLevelNow(PlayerId(), 0)
               end
+			  
               if NetworkIsHost() then
                  modelRequest(GetHashKey("prop_money_bag_01"))
                  money_bag = CreateObject (GetHashKey("prop_money_bag_01"),pickupos.x, pickupos.y, pickupos.z ,true, true, true)
+				 PlaceObjectOnGroundProperly(money_bag )
+                 FreezeEntityPosition(money_bag ,1)
               end
+			  Wait(200)
               netBag = ObjToNet(money_bag)
-              Wait(100)
+              Wait(150)
               TriggerServerEvent('objID',netBag)
               money = true
             end
+			  door = true
         end
 
-        if NetworkDoesNetworkIdExist(O_toNet) then
-           thisBag = NetToObj(O_toNet)
-           PlaceObjectOnGroundProperly(thisBag)
-           FreezeEntityPosition(thisBag,1)
+        if NetworkDoesNetworkIdExist(O_toNet) then 
            if not moneyBlip then
-              addBlip(money_bag_blip,thisBag,108,24,onMapBlipName_money)
+		      
+		      thisBag = NetToObj(O_toNet)
+              Wait(200)
+              blipName(money_bag_blip,thisBag,108,24,onMapBlipName_money)
               moneyBlip = true
+			  FreezeEntityPosition(thisBag,0)------------------------------------------------------------------------------------
            end
         end
 
@@ -229,33 +253,57 @@ Citizen.CreateThread(function()
            TriggerServerEvent('check:Pos')
            Wait(200)
            PlaySoundFrontend(-1,"PICK_UP", "HUD_FRONTEND_DEFAULT_SOUNDSET", 1)
+		   Wait(100)
            DeleteObject(thisBag)
-           Wait(300)
            check = false
            TriggerServerEvent('give_ok:give')
            despawn()
         end
 
         if near and (not notif) then
-           vRP.notify({moneyPickup.pickup})
+		   Notification(moneyPickup)
            notif = true
         end
 
         if DoesEntityExist(thisTruck) and GetEntityHealth(thisTruck) < 1 and check and (not near) then
            removeblip(Ar_truck)
-           vRP.notify({destroyedTruckNotif.notif})
+		   Notification(destroyedTruckNotif)
            if DoesEntityExist(thisBag) then
               DeleteObject(thisBag)
            end
            despawn()
         end
 
-        -- if vRP.isInComa() then
-           -- if DoesEntityExist(thisBag) then
-              -- DeleteObject(thisBag)
-           -- end
-           -- despawn()
-        -- end
+        if vRP.isInComa() then
+           if DoesEntityExist(thisBag) then
+              removeblip(money_bag_blip)
+			  fail = true
+			  despawn()
+           end 
+        end
    end
  end
 end)
+
+
+------------------------------------[Events]-------------------------------------------
+RegisterNetEvent('sharedID')
+AddEventHandler('sharedID', function(T_ID)
+ T_toNet = T_ID
+end)
+
+RegisterNetEvent('sharedObj')
+AddEventHandler('sharedObj', function(O_ID)
+ O_toNet = O_ID
+end)
+
+RegisterNetEvent('sharedPos')
+AddEventHandler('sharedPos', function(nearMoney)
+  near = nearMoney
+end)
+
+RegisterNetEvent('rewardNotif')
+AddEventHandler('rewardNotif', function(reward)
+Notification(rewardnotif[1]..reward..rewardnotif[2])
+end)
+---------------------------------------------------------------------------------------
