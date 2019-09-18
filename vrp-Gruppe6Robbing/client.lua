@@ -196,6 +196,7 @@ Citizen.CreateThread(function()
    if NetworkDoesNetworkIdExist(T_toNet) then
       if not truckBlip then
          thisTruck = NetToVeh(T_toNet)
+		 Wait(200)
          blipName(Ar_truck_blip,thisTruck,67,2,onMapBlipName_truck)
          IconNotif("CHAR_HUMANDEFAULT",4,spawnNotif.contact,spawnNotif.title,spawnNotif.msg)
          check = true
